@@ -36,6 +36,16 @@ public class Utils {
         return hexId.substring(hexId.length() - NUM_16_BIT_ID_DIGITS);
     }
 
+    public static String getLongestCommonPrefix(String hexId1, String hexId2) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < hexId1.length(); i++) {
+            if (hexId1.charAt(i) != hexId2.charAt(i))
+                break;
+            stringBuilder.append(hexId1.charAt(i));
+        }
+        return stringBuilder.toString();
+    }
+
     /**
      * This method converts a set of bytes into a Hexadecimal representation.
      *
