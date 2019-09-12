@@ -1,6 +1,10 @@
 package cs555.pastry.util;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+
 public class Utils {
+    public static final int NUM_16_BIT_ID_DIGITS = 4;
     private static boolean debug = true;
 
     public static void out(Object o) {
@@ -25,6 +29,11 @@ public class Utils {
 
     public static void error(Object o) {
         System.err.println("\nERROR: " + o);
+    }
+
+    public static String generateHexIdFromTimestamp() {
+        String hexId = convertBytesToHex(Timestamp.from(Instant.now()).toString().getBytes());
+        return hexId.substring(hexId.length() - NUM_16_BIT_ID_DIGITS);
     }
 
     /**
