@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 
 public class Utils {
+    public static final int NUM_ID_BITS = 16;
     public static final int NUM_16_BIT_ID_DIGITS = 4;
     private static boolean debug = true;
 
@@ -82,5 +83,9 @@ public class Utils {
             j++;
         }
         return buf;
+    }
+
+    public static int getHexIdDifference(String hexId1, String hexId2) {
+        return Integer.parseInt(hexId1, NUM_ID_BITS) - Integer.parseInt(hexId2, NUM_ID_BITS);
     }
 }
