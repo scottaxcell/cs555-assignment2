@@ -24,5 +24,11 @@ public class Main {
         Utils.debug("hex2: " + hexId2);
         longestCommonPrefix = Utils.getLongestCommonPrefix(hexId1, hexId2);
         Utils.debug("longest common prefix: " + longestCommonPrefix);
-    }
+
+        int hexIdDifference = Utils.getHexIdDecimalDifference(hexId1, hexId2);
+        Utils.debug(hexIdDifference);
+        hexIdDifference = Utils.getHexIdDecimalDifference(hexId2, hexId1);
+        Utils.debug(hexIdDifference);
+        hexIdDifference = Utils.getHexIdDecimalDifference("1AF3", "88AE");
+        Utils.debug(hexIdDifference);}
 }

@@ -13,8 +13,8 @@ public class DistributedHashTable {
 
     public String lookup(String destHexId) {
         // if L-l < D < Ll, return A (this node)
-        if (Utils.getHexIdDifference(destHexId, leafSet.getLeftNeighbor().getId()) > 0
-                && Utils.getHexIdDifference(leafSet.getRightNeghbor().getId(), destHexId) > 0) {
+        if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighbor().getId()) > 0
+                && Utils.getHexIdDecimalDifference(leafSet.getRightNeghbor().getId(), destHexId) > 0) {
             return hexId;
         }
 
