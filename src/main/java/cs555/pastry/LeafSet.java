@@ -12,11 +12,11 @@ public class LeafSet {
         this.leftNeighbor = leftNeighbor;
     }
 
-    public Peer getRightNeghbor() {
+    public Peer getRightNeighbor() {
         return rightNeghbor;
     }
 
-    public void setRightNeghbor(Peer rightNeghbor) {
+    public void setRightNeighbor(Peer rightNeghbor) {
         this.rightNeghbor = rightNeghbor;
     }
 }

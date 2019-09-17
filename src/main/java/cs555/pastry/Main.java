@@ -15,7 +15,7 @@ public class Main {
         String hexId2 = Utils.generateHexIdFromTimestamp();
         Utils.debug("hex2: " + hexId2);
         String longestCommonPrefix = Utils.getLongestCommonPrefix(hexId1, hexId2);
-        Utils.debug("longest common prefix: " + longestCommonPrefix);
+        Utils.debug("longest common prefix: " + longestCommonPrefix + " : " + longestCommonPrefix.length());
 
         hexId1 = "65a1";
         Utils.debug("hex1: " + hexId1);
@@ -23,7 +23,7 @@ public class Main {
         hexId2 = "65b1";
         Utils.debug("hex2: " + hexId2);
         longestCommonPrefix = Utils.getLongestCommonPrefix(hexId1, hexId2);
-        Utils.debug("longest common prefix: " + longestCommonPrefix);
+        Utils.debug("longest common prefix: " + longestCommonPrefix + " : " + longestCommonPrefix.length());
 
         int hexIdDifference = Utils.getHexIdDecimalDifference(hexId1, hexId2);
         Utils.debug(hexIdDifference);

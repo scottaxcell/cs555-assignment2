@@ -88,4 +88,8 @@ public class Utils {
     public static int getHexIdDecimalDifference(String hexId1, String hexId2) {
         return Integer.parseInt(hexId1, HEXADECIMAL_RADIX) - Integer.parseInt(hexId2, HEXADECIMAL_RADIX);
     }
+
+    public static int getAbsoluteHexIdDecimalDifference(String hexId1, String hexId2) {
+        return Math.abs(getHexIdDecimalDifference(hexId1, hexId2));
+    }
 }
