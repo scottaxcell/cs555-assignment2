@@ -7,13 +7,11 @@ import java.net.Socket;
 
 public class TcpConnection {
     private final Socket socket;
-    private final Node node;
     private TcpReceiver tcpReceiver;
     private TcpSender tcpSender;
 
     public TcpConnection(Socket socket, Node node) {
         this.socket = socket;
-        this.node = node;
 
         tcpReceiver = new TcpReceiver(socket, node);
         Thread thread = new Thread(tcpReceiver);

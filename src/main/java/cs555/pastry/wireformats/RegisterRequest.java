@@ -3,8 +3,10 @@ package cs555.pastry.wireformats;
 import cs555.pastry.routing.Peer;
 
 import java.io.*;
+import java.net.Socket;
 
 public class RegisterRequest implements Message {
+    private Socket socket;
     private String id;
     private String ip;
 
@@ -32,6 +34,7 @@ public class RegisterRequest implements Message {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
 
+            WireformatUtils.serializeInt(dataOutputStream, getProtocol());
             WireformatUtils.serializeString(dataOutputStream, id);
             WireformatUtils.serializeString(dataOutputStream, ip);
 
@@ -49,7 +52,9 @@ public class RegisterRequest implements Message {
         }
     }
 
-    public RegisterRequest(byte[] bytes) {
+    public RegisterRequest(byte[] bytes, Socket socket) {
+        this.socket = socket;
+
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
@@ -63,6 +68,10 @@ public class RegisterRequest implements Message {
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
     public Peer getPeer() {

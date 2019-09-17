@@ -1,4 +1,4 @@
-package cs555.pastry.node;
+package cs555.pastry.node.discovery;
 
 import cs555.pastry.routing.Peer;
 

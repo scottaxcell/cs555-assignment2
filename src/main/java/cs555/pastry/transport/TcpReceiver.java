@@ -35,7 +35,7 @@ public class TcpReceiver implements Runnable {
                 int dataLength = dataInputStream.readInt();
                 byte[] data = new byte[dataLength];
                 dataInputStream.readFully(data, 0, dataLength);
-                Message message = MessageFactory.getMessageFromData(data);
+                Message message = MessageFactory.getMessageFromData(data, socket);
                 node.onMessage(message);
             }
             catch (IOException e) {
