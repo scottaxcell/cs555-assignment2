@@ -1,4 +1,4 @@
-package cs555.pastry;
+package cs555.pastry.routing;
 
 import cs555.pastry.util.Utils;
 
@@ -13,7 +13,7 @@ public class DistributedHashTable {
         routingTable = new RoutingTable(hexId);
     }
 
-    public String lookup(String destHexId) {
+    public String lookupId(String destHexId) {
         // if L-l < D < Ll, return A (this node)
         if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighbor().getId()) > 0
                 && Utils.getHexIdDecimalDifference(leafSet.getRightNeighbor().getId(), destHexId) > 0) {
@@ -31,5 +31,17 @@ public class DistributedHashTable {
             else
                 return leafSet.getLeftNeighbor().getId();
         }
+    }
+
+    public void updateRoutingTable(Peer peer) {
+        routingTable.update(peer);
+    }
+
+    public void setLeftNeighbor(Peer peer) {
+        leafSet.setLeftNeighbor(peer);
+    }
+
+    public void setRightNeighbor(Peer peer) {
+        leafSet.setRightNeighbor(peer);
     }
 }

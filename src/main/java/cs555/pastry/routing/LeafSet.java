@@ -1,4 +1,4 @@
-package cs555.pastry;
+package cs555.pastry.routing;
 
 public class LeafSet {
     private Peer leftNeighbor;

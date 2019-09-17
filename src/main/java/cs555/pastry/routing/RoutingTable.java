@@ -1,4 +1,4 @@
-package cs555.pastry;
+package cs555.pastry.routing;
 
 import cs555.pastry.util.Utils;
 
@@ -10,7 +10,6 @@ public class RoutingTable {
         this.hexId = hexId;
         for (int i = 0; i < Utils.NUM_16_BIT_ID_DIGITS; i++)
             table[i] = new Peer[Utils.HEXADECIMAL_RADIX];
-        Utils.debug(table);
     }
 
     public String lookup(String destHexId) {
