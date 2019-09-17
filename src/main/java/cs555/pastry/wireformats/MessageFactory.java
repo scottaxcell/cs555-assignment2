@@ -15,6 +15,8 @@ public class MessageFactory {
         switch (protocol) {
             case Protocol.REGISTER_REQUEST:
                 return new RegisterRequest(data, socket);
+            case Protocol.REGISTER_RESPONSE:
+                return new RegisterResponse(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
