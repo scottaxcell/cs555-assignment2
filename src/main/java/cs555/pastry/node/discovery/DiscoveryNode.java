@@ -1,13 +1,14 @@
 package cs555.pastry.node.discovery;
 
 import cs555.pastry.node.Node;
+import cs555.pastry.routing.Peer;
 import cs555.pastry.transport.TcpSender;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;
 import cs555.pastry.wireformats.Message;
 import cs555.pastry.wireformats.Protocol;
 import cs555.pastry.wireformats.RegisterRequest;
-import cs555.pastry.wireformats.RegisterRequestFailed;
+import cs555.pastry.wireformats.RegisterResponse;
 
 import java.net.Socket;
 
@@ -17,16 +18,6 @@ public class DiscoveryNode implements Node {
 
     private DiscoveryNode(int port) {
         tcpServer = new TcpServer(port, this);
-    }
-
-    private void handleRegisterRequest(RegisterRequest request) {
-        Utils.debug("received: " + request);
-        if (!peers.registerPeer(request.getPeer())) {
-            Socket socket = request.getSocket();
-            RegisterRequestFailed registerRequestFailed = new RegisterRequestFailed();
-            TcpSender tcpSender = new TcpSender(socket);
-            tcpSender.send(registerRequestFailed.getBytes());
-        }
     }
 
     @Override
@@ -39,6 +30,24 @@ public class DiscoveryNode implements Node {
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleRegisterRequest(RegisterRequest request) {
+        Utils.debug("received: " + request);
+
+        RegisterResponse registerResponse = new RegisterResponse();
+        if (!peers.registerPeer(request.getPeer()))
+            registerResponse.setRegistrationSuccess(false);
+        else {
+            registerResponse.setRegistrationSuccess(true);
+            registerResponse.setAssignedId(request.getPeer().getId());
+            Peer randomPeer = peers.getRandomPeer();
+            if (randomPeer != null)
+                registerResponse.setRandomPeerId(randomPeer.getId());
+        }
+        Socket socket = request.getSocket();
+        TcpSender tcpSender = new TcpSender(socket);
+        tcpSender.send(registerResponse.getBytes());
     }
 
     @Override

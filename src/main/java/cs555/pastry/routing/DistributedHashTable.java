@@ -13,12 +13,18 @@ public class DistributedHashTable {
         routingTable = new RoutingTable(hexId);
     }
 
-    public String lookupId(String destHexId) {
+    public String lookup(String destHexId) {
         // if L-l < D < Ll, return A (this node)
         if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighbor().getId()) > 0
                 && Utils.getHexIdDecimalDifference(leafSet.getRightNeighbor().getId(), destHexId) > 0) {
             return hexId;
         }
+
+        if (leafSet.getLeftNeighbor().getId().equals(destHexId))
+            return leafSet.getLeftNeighbor().getId();
+
+        if (leafSet.getRightNeighbor().getId().equals(destHexId))
+            return leafSet.getRightNeighbor().getId();
 
         String nextPeerId = routingTable.lookup(destHexId);
         if (!nextPeerId.isEmpty())

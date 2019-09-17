@@ -52,6 +52,16 @@ public class WireformatUtils {
         }
     }
 
+    public static boolean deserializeBoolean(DataInputStream dataInputStream) {
+        try {
+            boolean b = dataInputStream.readBoolean();
+            return b;
+        }
+        catch (IOException e) {
+            return false;
+        }
+    }
+
     public static void serializeString(DataOutputStream dataOutputStream, String string) {
         try {
             dataOutputStream.writeInt(string.getBytes().length);
@@ -84,6 +94,15 @@ public class WireformatUtils {
         try {
             dataOutputStream.writeInt(bytes.length);
             dataOutputStream.write(bytes);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void serializeBoolean(DataOutputStream dataOutputStream, boolean b) {
+        try {
+            dataOutputStream.writeBoolean(b);
         }
         catch (IOException e) {
             e.printStackTrace();
