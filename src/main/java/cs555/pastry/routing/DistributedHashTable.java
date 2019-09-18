@@ -50,4 +50,10 @@ public class DistributedHashTable {
     public void setRightNeighbor(Peer peer) {
         leafSet.setRightNeighbor(peer);
     }
+
+    public void printState() {
+        Utils.out("Hex ID: " + hexId + "\n");
+        leafSet.printState();
+        routingTable.printState();
+    }
 }

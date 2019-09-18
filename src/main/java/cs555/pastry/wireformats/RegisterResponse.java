@@ -50,6 +50,7 @@ public class RegisterResponse implements Message {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
 
+            int protocol = WireformatUtils.deserializeInt(dataInputStream);
             registrationSuccess = WireformatUtils.deserializeBoolean(dataInputStream);
             assignedId = WireformatUtils.deserializeString(dataInputStream);
             randomPeerId = WireformatUtils.deserializeString(dataInputStream);

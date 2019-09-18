@@ -59,6 +59,7 @@ public class RegisterRequest implements Message {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
 
+            int protocol = WireformatUtils.deserializeInt(dataInputStream);
             id = WireformatUtils.deserializeString(dataInputStream);
             ip = WireformatUtils.deserializeString(dataInputStream);
 

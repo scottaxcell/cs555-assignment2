@@ -16,4 +16,12 @@ public class Peer {
     public String getIp() {
         return ip;
     }
+
+    @Override
+    public String toString() {
+        return "Peer{" +
+                "id='" + id + '\'' +
+                ", ip='" + ip + '\'' +
+                '}';
+    }
 }

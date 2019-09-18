@@ -11,7 +11,7 @@ public class MessageFactory {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
         DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
 
-        int protocol = dataInputStream.readInt();
+        int protocol = WireformatUtils.deserializeInt(dataInputStream);
         switch (protocol) {
             case Protocol.REGISTER_REQUEST:
                 return new RegisterRequest(data, socket);

@@ -20,9 +20,9 @@ public class Utils {
 
     public static void info(Object o, boolean newLine) {
         if (newLine)
-            System.out.println("\nINFO: " + o);
+            System.out.println("INFO: " + o);
         else
-            System.out.print("\nINFO: " + o);
+            System.out.print("INFO: " + o);
     }
 
     public static void debug(Object o) {

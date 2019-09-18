@@ -2,6 +2,8 @@ package cs555.pastry.routing;
 
 import cs555.pastry.util.Utils;
 
+import java.util.Arrays;
+
 public class RoutingTable {
     private final String hexId;
     private final Peer[][] table = new Peer[Utils.NUM_16_BIT_ID_DIGITS][];
@@ -58,6 +60,13 @@ public class RoutingTable {
 
     @Override
     public String toString() {
+        return "RoutingTable{" +
+                "hexId='" + hexId + '\'' +
+                ", table=" + Arrays.toString(table) +
+                '}';
+    }
+
+    public void printState() {
         StringBuilder stringBuilder = new StringBuilder("Routing Table\n");
         stringBuilder.append("   ");
         for (int col = 0; col < Utils.HEXADECIMAL_RADIX ; col++)
@@ -76,6 +85,6 @@ public class RoutingTable {
             stringBuilder.append("\n");
         }
         stringBuilder.append("\n");
-        return stringBuilder.toString();
+        Utils.out(stringBuilder);
     }
 }

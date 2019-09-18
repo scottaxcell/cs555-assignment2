@@ -7,6 +7,9 @@ Implementing The Pastry Peer To Peer Network
 * return a random node from the peer db
 * ensure a peer's id s unique on registration
 
+### Peer node
+* must accept hex id from command line
+
 ## Notes
 * store connected peer tcp connections using the registration id
 ### Join protocol

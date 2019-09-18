@@ -1,6 +1,7 @@
 package cs555.pastry.node.discovery;
 
 import cs555.pastry.routing.Peer;
+import cs555.pastry.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +32,7 @@ public class Peers {
             return false;
 
         synchronized (peers) {
+            Utils.info("registered peer " + peer.getId() + " @ " + peer.getIp());
             return peers.add(peer);
         }
     }
