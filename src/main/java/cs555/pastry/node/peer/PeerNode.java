@@ -12,6 +12,7 @@ import cs555.pastry.wireformats.*;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PeerNode implements Node {
@@ -51,6 +52,8 @@ public class PeerNode implements Node {
                 break;
             case Protocol.JOIN_REQUEST:
                 handleJoinRequest((JoinRequest) message);
+            case Protocol.JOIN_RESPONSE:
+                handleJoinResponse((JoinResponse) message);
                 break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
@@ -60,14 +63,17 @@ public class PeerNode implements Node {
     private void handleJoinRequest(JoinRequest request) {
         String destinationHexId = request.getDestinationHexId();
         String lookup = distributedHashTable.lookup(destinationHexId);
+        List<String> route = request.getRoute();
+        Peer[][] routingTable = request.getRoutingTable();
+
         if (lookup.isEmpty()) {
             Utils.error("lookup failed for: " + destinationHexId);
             new Exception().printStackTrace();
             return;
         }
+
         if (!destinationHexId.equals(lookup)) {
-            List<String> route = request.getRoute();
-            Peer[][] routingTable = request.getRoutingTable();
+
 
             Peer[] nextTableRow = distributedHashTable.getTableRow(destinationHexId);
             int tableRowIndex = route.size() - 1;
@@ -85,8 +91,29 @@ public class PeerNode implements Node {
             }
         }
         else {
-            // todo
+            JoinResponse joinResponse = new JoinResponse(getHexId(), createUpdatedRoute(route), distributedHashTable.getLeafSet(), request.getRoutingTable());
+            String[] splitServerAddress = Utils.splitServerAddress(destinationHexId);
+            try {
+                Socket socket = new Socket(splitServerAddress[0], Integer.parseInt(splitServerAddress[1]));
+                TcpSender tcpSender = new TcpSender(socket);
+                tcpSender.send(joinResponse.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private void handleJoinResponse(JoinResponse response) {
+        String destinationHexId = response.getDestinationHexId();
+        String lookup = distributedHashTable.lookup(destinationHexId);
+        List<String> route = response.getRoute();
+        Peer[][] routingTable = response.getRoutingTable();
+        String[] leafSet = response.getLeafSet();
+
+        // todo
+
+
+
     }
 
     private List<String> createUpdatedRoute(List<String> route) {
@@ -104,7 +131,15 @@ public class PeerNode implements Node {
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
             if (!randomPeerId.isEmpty() && !getHexId().equals(randomPeerId)) {
-                // todo send special join message to random peer
+                JoinRequest joinRequest = new JoinRequest(getHexId(), Collections.emptyList(), distributedHashTable.getRoutingTable());
+                String[] splitServerAddress = Utils.splitServerAddress(randomPeerId);
+                try {
+                    Socket socket = new Socket(splitServerAddress[0], Integer.parseInt(splitServerAddress[1]));
+                    TcpSender tcpSender = new TcpSender(socket);
+                    tcpSender.send(joinRequest.getBytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         else {

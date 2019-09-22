@@ -5,4 +5,5 @@ public class Protocol {
     public static final int REGISTER_RESPONSE = 301;
     public static final int JOIN_REQUEST = 302;
     public static final int LOOKUP = 303;
+    public static final int JOIN_RESPONSE = 304;
 }

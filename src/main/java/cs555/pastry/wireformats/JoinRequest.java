@@ -14,6 +14,11 @@ public class JoinRequest extends Lookup {
         table = routingTable;
     }
 
+    protected JoinRequest(int protocol, String destinationHexId, List<String> route, Peer[][] routingTable) {
+        super(protocol, destinationHexId, route);
+        table = routingTable;
+    }
+
     public JoinRequest(byte[] bytes) {
         super();
 
@@ -38,9 +43,12 @@ public class JoinRequest extends Lookup {
         }
     }
 
+    public JoinRequest() {
+    }
+
     @Override
     public int getProtocol() {
-        return Protocol.JOIN_REQUEST;
+        return super.getProtocol();
     }
 
     @Override

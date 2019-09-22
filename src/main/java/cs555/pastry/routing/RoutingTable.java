@@ -104,4 +104,8 @@ public class RoutingTable {
         int p = longestCommonPrefix.length();
         return table[p];
     }
+
+    public Peer[][] getTable() {
+        return table;
+    }
 }
