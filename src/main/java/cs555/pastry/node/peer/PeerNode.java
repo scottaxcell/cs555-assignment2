@@ -64,7 +64,7 @@ public class PeerNode implements Node {
 
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
-            if (!randomPeerId.isEmpty()) {
+            if (!randomPeerId.isEmpty() && !getHexId().equals(randomPeerId)) {
                 // todo send special join message to random peer
             }
         }
@@ -74,6 +74,9 @@ public class PeerNode implements Node {
         }
     }
 
+    private String getHexId() {
+        return distributedHashTable.getHexId();
+    }
     @Override
     public String getNodeTypeAsString() {
         return "PeerNode";

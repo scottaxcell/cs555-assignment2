@@ -22,7 +22,28 @@ Implementing The Pastry Peer To Peer Network
 * the third row of C's rt should be copied to the third row of X's rt
 * Z's leafset should be copied to X's leafset
 * Z sends it's contents (leafset and rt) to all peers in it's leafset and rt
-* peers that receive this message, update their own tables to incorporate new peer X 
+* peers that receive this message, update their own tables to incorporate new peer X
+### Message requirements
+#### Register
+* request: hex id and ip
+* response: success, assigned hex id, random peer id
+
+#### Join
+* requset: route and hop count, destination, DHT
+
+#### Lookup
+* request: route and hop count, destination
+* response: hex ip and ip ?
+
+#### Update DHT
+* DHT
+
+#### Store file
+* request: file name, file data
+* response: file name, file data, writeSuccess
+
+#### Remove peer
+* hex id
 
 
 

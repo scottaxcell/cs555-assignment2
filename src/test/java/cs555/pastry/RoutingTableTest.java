@@ -31,6 +31,8 @@ public class RoutingTableTest {
 
     @Test
     public void lookup() {
+        routingTable.printState();
+
         String lookup = routingTable.lookup("63ff");
         Assert.assertEquals("63df", lookup);
 
@@ -42,6 +44,9 @@ public class RoutingTableTest {
 
         lookup = routingTable.lookup("0032");
         Assert.assertEquals("004b", lookup);
+
+        lookup = routingTable.lookup("65ef");
+        Assert.assertEquals("65e3", lookup);
     }
 
     @Test
