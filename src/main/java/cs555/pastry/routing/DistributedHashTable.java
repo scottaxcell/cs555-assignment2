@@ -15,17 +15,18 @@ public class DistributedHashTable {
 
     public String lookup(String destHexId) {
         // if L0 < D < Ll, return A (this node)
-        if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighbor().getId()) > 0
-                && Utils.getHexIdDecimalDifference(leafSet.getRightNeighbor().getId(), destHexId) > 0) {
-            return hexId;
+        if (leafSet.getLeftNeighbor() != null && leafSet.getRightNeighbor() != null) {
+            if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighbor().getId()) > 0
+                    && Utils.getHexIdDecimalDifference(leafSet.getRightNeighbor().getId(), destHexId) > 0) {
+                return hexId;
+            }
         }
-
         // if L0 == D, return L0
-        if (leafSet.getLeftNeighbor().getId().equals(destHexId))
+        if (leafSet.getLeftNeighbor() != null && leafSet.getLeftNeighbor().getId().equals(destHexId))
             return leafSet.getLeftNeighbor().getId();
 
         // if L1 == D, return L1
-        if (leafSet.getRightNeighbor().getId().equals(destHexId))
+        if (leafSet.getRightNeighbor() != null && leafSet.getRightNeighbor().getId().equals(destHexId))
             return leafSet.getRightNeighbor().getId();
 
         String nextPeerId = routingTable.lookup(destHexId);
@@ -33,12 +34,16 @@ public class DistributedHashTable {
             return nextPeerId;
         else {
             // return closest neighbor in leaf set
-            int leftNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getLeftNeighbor().getId());
-            int rightNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getRightNeighbor().getId());
-            if (leftNeighborHexIdDecimalDifference < rightNeighborHexIdDecimalDifference)
-                return leafSet.getRightNeighbor().getId();
+            if (leafSet.getLeftNeighbor() != null && leafSet.getRightNeighbor() != null) {
+                int leftNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getLeftNeighbor().getId());
+                int rightNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getRightNeighbor().getId());
+                if (leftNeighborHexIdDecimalDifference < rightNeighborHexIdDecimalDifference)
+                    return leafSet.getRightNeighbor().getId();
+                else
+                    return leafSet.getLeftNeighbor().getId();
+            }
             else
-                return leafSet.getLeftNeighbor().getId();
+                return "";
         }
     }
 
@@ -62,5 +67,13 @@ public class DistributedHashTable {
 
     public String getHexId() {
         return hexId;
+    }
+
+    public Peer getPeer(String hexId) {
+        return routingTable.getPeer(hexId);
+    }
+
+    public Peer[] getTableRow(String hexId) {
+        return routingTable.getTableRow(hexId);
     }
 }

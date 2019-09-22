@@ -2,13 +2,34 @@
 Implementing The Pastry Peer To Peer Network
 
 ## TODO
+
+### Miscellaneous
+* file read/write on client and peer nodes
+
+
 ### Discovery node
 * send alive heartbeats to connected peers, on disconnect update peer db
-* return a random node from the peer db
-* ensure a peer's id s unique on registration
+* ~~return a random node from the peer db~~
+* ~~ensure a peer's id s unique on registration~~
+* handle peer removal and print peer was removed
+* list-nodes: prints list of active peers
 
 ### Peer node
-* must accept hex id from command line
+* accept hex id from command line
+* print the following on joining: DHT, route
+* print DHT on update
+* print when storing a file or sends to another peer
+* print on lookup/join queries: type of message, dest/file id, hop count, next hop
+* remove-node: remove self from network after contacting discovery node
+* print-dht: print DHT
+* list-files: prints files in storage
+
+### StoreData
+* store/retrive file:
+    * print random node it connects to
+    * print id of data
+    * print route of lookup message
+    * print success/fail of file operation
 
 ## Notes
 * store connected peer tcp connections using the registration id

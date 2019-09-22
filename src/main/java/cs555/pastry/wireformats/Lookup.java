@@ -82,4 +82,8 @@ public class Lookup implements Message {
     public List<String> getRoute() {
         return route;
     }
+
+    public String getDestinationHexId() {
+        return destinationHexId;
+    }
 }

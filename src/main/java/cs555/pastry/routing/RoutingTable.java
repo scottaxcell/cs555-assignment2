@@ -69,7 +69,7 @@ public class RoutingTable {
     public void printState() {
         StringBuilder stringBuilder = new StringBuilder("Routing Table\n");
         stringBuilder.append("   ");
-        for (int col = 0; col < Utils.HEXADECIMAL_RADIX ; col++)
+        for (int col = 0; col < Utils.HEXADECIMAL_RADIX; col++)
             stringBuilder.append(String.format("%-5s", Integer.toHexString(col)));
         stringBuilder.append("\n");
 
@@ -86,5 +86,22 @@ public class RoutingTable {
         }
         stringBuilder.append("\n");
         Utils.out(stringBuilder);
+    }
+
+    public Peer getPeer(String hexId) {
+        for (int row = 0; row < table.length; row++) {
+            for (int col = 0; col < table[row].length; col++) {
+                Peer peer = table[row][col];
+                if (peer != null && peer.getId().equals(hexId))
+                    return peer;
+            }
+        }
+        return null;
+    }
+
+    public Peer[] getTableRow(String destHexId) {
+        String longestCommonPrefix = Utils.getLongestCommonPrefix(hexId, destHexId);
+        int p = longestCommonPrefix.length();
+        return table[p];
     }
 }

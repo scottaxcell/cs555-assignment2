@@ -7,10 +7,11 @@ import java.io.*;
 import java.util.List;
 
 public class JoinRequest extends Lookup {
-    private final Peer[][] table = new Peer[Utils.NUM_16_BIT_ID_DIGITS][];
+    private Peer[][] table = new Peer[Utils.NUM_16_BIT_ID_DIGITS][];
 
-    public JoinRequest(String destinationHexId, List<String> route) {
+    public JoinRequest(String destinationHexId, List<String> route, Peer[][] routingTable) {
         super(Protocol.JOIN_REQUEST, destinationHexId, route);
+        table = routingTable;
     }
 
     public JoinRequest(byte[] bytes) {
@@ -84,5 +85,9 @@ public class JoinRequest extends Lookup {
             e.printStackTrace();
             return new byte[0];
         }
+    }
+
+    public Peer[][] getRoutingTable() {
+        return table;
     }
 }

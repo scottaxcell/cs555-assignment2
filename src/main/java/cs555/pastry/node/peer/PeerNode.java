@@ -2,13 +2,17 @@ package cs555.pastry.node.peer;
 
 import cs555.pastry.node.Node;
 import cs555.pastry.routing.DistributedHashTable;
+import cs555.pastry.routing.Peer;
 import cs555.pastry.transport.TcpConnection;
+import cs555.pastry.transport.TcpSender;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;
 import cs555.pastry.wireformats.*;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PeerNode implements Node {
     private final TcpServer tcpServer;
@@ -54,7 +58,42 @@ public class PeerNode implements Node {
     }
 
     private void handleJoinRequest(JoinRequest request) {
+        String destinationHexId = request.getDestinationHexId();
+        String lookup = distributedHashTable.lookup(destinationHexId);
+        if (lookup.isEmpty()) {
+            Utils.error("lookup failed for: " + destinationHexId);
+            new Exception().printStackTrace();
+            return;
+        }
+        if (!destinationHexId.equals(lookup)) {
+            List<String> route = request.getRoute();
+            Peer[][] routingTable = request.getRoutingTable();
 
+            Peer[] nextTableRow = distributedHashTable.getTableRow(destinationHexId);
+            int tableRowIndex = route.size() - 1;
+            routingTable[tableRowIndex] = nextTableRow;
+
+            JoinRequest joinRequest = new JoinRequest(destinationHexId, createUpdatedRoute(route), routingTable);
+            Peer peer = distributedHashTable.getPeer(lookup);
+            String[] splitServerAddress = Utils.splitServerAddress(peer.getIp());
+            try {
+                Socket socket = new Socket(splitServerAddress[0], Integer.parseInt(splitServerAddress[1]));
+                TcpSender tcpSender = new TcpSender(socket);
+                tcpSender.send(joinRequest.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            // todo
+        }
+    }
+
+    private List<String> createUpdatedRoute(List<String> route) {
+        List<String> r = new ArrayList<>();
+        r.addAll(route);
+        r.add(getHexId());
+        return r;
     }
 
     private void handleRegisterResponse(RegisterResponse response) {
