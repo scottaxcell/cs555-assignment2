@@ -98,4 +98,11 @@ public class JoinRequest extends Lookup {
     public Peer[][] getRoutingTable() {
         return table;
     }
+
+    /**
+     * ip for the peer that originated this join request
+     */
+    public String getInitPeerIp() {
+        return getRoute().get(0);
+    }
 }

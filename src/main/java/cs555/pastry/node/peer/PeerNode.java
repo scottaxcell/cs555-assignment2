@@ -32,8 +32,7 @@ public class PeerNode implements Node {
             discoveryNodeTcpConnection = new TcpConnection(socket, this);
             RegisterRequest request = new RegisterRequest(Utils.generateHexIdFromTimestamp(), Utils.getServerAddress(tcpServer));
             discoveryNodeTcpConnection.send(request.getBytes());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -61,11 +60,23 @@ public class PeerNode implements Node {
     }
 
     private void handleJoinRequest(JoinRequest request) {
+        if (distributedHashTable.getLeafSet().getLeftNeighborId().isEmpty() &&
+                distributedHashTable.getLeafSet().getRightNeighborId().isEmpty()) {
+            // we are the second node to enter the network
+            sendJoinResponse(request);
+            return;
+        }
+        else if (distributedHashTable.getLeafSet().getLeftNeighborId().equals(distributedHashTable.getLeafSet().getRightNeighborId())) {
+            // we are the thrid node to enter the network
+            sendJoinResponse(request);
+            return;
+        }
+
         String destinationHexId = request.getDestinationHexId();
-        String lookup = distributedHashTable.lookup(destinationHexId);
         List<String> route = request.getRoute();
         Peer[][] routingTable = request.getRoutingTable();
 
+        String lookup = distributedHashTable.lookup(destinationHexId);
         if (lookup.isEmpty()) {
             Utils.error("lookup failed for: " + destinationHexId);
             new Exception().printStackTrace();
@@ -73,34 +84,25 @@ public class PeerNode implements Node {
         }
 
         if (!destinationHexId.equals(lookup)) {
-
-
             Peer[] nextTableRow = distributedHashTable.getTableRow(destinationHexId);
             int tableRowIndex = route.size() - 1;
             routingTable[tableRowIndex] = nextTableRow;
 
             JoinRequest joinRequest = new JoinRequest(destinationHexId, createUpdatedRoute(route), routingTable);
             Peer peer = distributedHashTable.getPeer(lookup);
-            String[] splitServerAddress = Utils.splitServerAddress(peer.getIp());
-            try {
-                Socket socket = new Socket(splitServerAddress[0], Integer.parseInt(splitServerAddress[1]));
-                TcpSender tcpSender = new TcpSender(socket);
+            TcpSender tcpSender = TcpSender.of(peer.getIp());
+            if (tcpSender != null)
                 tcpSender.send(joinRequest.getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
-        else {
-            JoinResponse joinResponse = new JoinResponse(getHexId(), createUpdatedRoute(route), distributedHashTable.getLeafSet(), request.getRoutingTable());
-            String[] splitServerAddress = Utils.splitServerAddress(destinationHexId);
-            try {
-                Socket socket = new Socket(splitServerAddress[0], Integer.parseInt(splitServerAddress[1]));
-                TcpSender tcpSender = new TcpSender(socket);
-                tcpSender.send(joinResponse.getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        else
+            sendJoinResponse(request);
+    }
+
+    private void sendJoinResponse(JoinRequest request) {
+        JoinResponse joinResponse = new JoinResponse(getHexId(), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
+        TcpSender tcpSender = TcpSender.of(request.getInitPeerIp());
+        if (tcpSender != null)
+            tcpSender.send(joinResponse.getBytes());
     }
 
     private void handleJoinResponse(JoinResponse response) {
@@ -110,8 +112,9 @@ public class PeerNode implements Node {
         Peer[][] routingTable = response.getRoutingTable();
         String[] leafSet = response.getLeafSet();
 
-        // todo
-
+        // todo only node in network
+        // todo second node in network
+        //
 
 
     }
@@ -151,6 +154,7 @@ public class PeerNode implements Node {
     private String getHexId() {
         return distributedHashTable.getHexId();
     }
+
     @Override
     public String getNodeTypeAsString() {
         return "PeerNode";

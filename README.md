@@ -5,7 +5,7 @@ Implementing The Pastry Peer To Peer Network
 
 ### Miscellaneous
 * file read/write on client and peer nodes
-
+* take another look at storing tcp connections in order to prevent creation of tons of tcp receiver threads
 
 ### Discovery node
 * send alive heartbeats to connected peers, on disconnect update peer db
@@ -50,7 +50,8 @@ Implementing The Pastry Peer To Peer Network
 * response: success, assigned hex id, random peer id
 
 #### Join
-* requset: route and hop count, destination, DHT
+* requset: route and hop count, destination, RT
+* response: route and hop count, destination, RT, leafset
 
 #### Lookup
 * request: route and hop count, destination
