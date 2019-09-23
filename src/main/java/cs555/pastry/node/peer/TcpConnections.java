@@ -31,7 +31,8 @@ public class TcpConnections {
 
             try {
                 return new TcpConnection(new Socket(ip, peerNode.getPort()), peerNode);
-            } catch (IOException e) {
+            }
+            catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }

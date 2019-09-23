@@ -14,16 +14,21 @@ public class Peers {
     public boolean peerIdAlreadyRegistered(String peerId) {
         synchronized (peers) {
             return peers.stream()
-                    .anyMatch(p -> p.getId().equals(peerId));
+                .anyMatch(p -> p.getId().equals(peerId));
         }
     }
 
-    public Peer getRandomPeer() {
+    public Peer getRandomPeer(String excludingId) {
         synchronized (peers) {
-            if (peers.isEmpty())
+            if (peers.isEmpty() || peers.size() == 1)
                 return null;
-            int randomPeerIdx = ThreadLocalRandom.current().nextInt(peers.size());
-            return peers.get(randomPeerIdx);
+
+            Peer peer = peers.get(ThreadLocalRandom.current().nextInt(peers.size()));
+
+            while (peer.getId().equals(excludingId))
+                peer = peers.get(ThreadLocalRandom.current().nextInt(peers.size()));
+
+            return peer;
         }
     }
 

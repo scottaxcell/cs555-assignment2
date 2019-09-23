@@ -33,9 +33,9 @@ public class LeafSet {
     @Override
     public String toString() {
         return "LeafSet{" +
-                "leftNeighbor=" + leftNeighbor +
-                ", rightNeghbor=" + rightNeghbor +
-                '}';
+            "leftNeighbor=" + leftNeighbor +
+            ", rightNeghbor=" + rightNeghbor +
+            '}';
     }
 
     public void printState() {

@@ -16,7 +16,7 @@ public class DistributedHashTable {
     public String lookup(String destHexId) {
         // if L0 < D < Ll, return A (this node)
         if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighborId()) > 0
-                && Utils.getHexIdDecimalDifference(leafSet.getRightNeighborId(), destHexId) > 0) {
+            && Utils.getHexIdDecimalDifference(leafSet.getRightNeighborId(), destHexId) > 0) {
             return hexId;
         }
         // if L0 == D, return L0

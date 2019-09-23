@@ -25,9 +25,9 @@ public class Peer {
     @Override
     public String toString() {
         return "Peer{" +
-                "id='" + id + '\'' +
-                ", address='" + address + '\'' +
-                '}';
+            "id='" + id + '\'' +
+            ", address='" + address + '\'' +
+            '}';
     }
 
     public static Peer deserialize(DataInputStream dataInputStream) {

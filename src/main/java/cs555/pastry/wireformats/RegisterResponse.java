@@ -13,7 +13,12 @@ public class RegisterResponse implements Message {
 
     @Override
     public String toString() {
-        return "RegisterResponse";
+        return "RegisterResponse{" +
+            "registrationSuccess=" + registrationSuccess +
+            ", assignedId='" + assignedId + '\'' +
+            ", randomPeerId='" + randomPeerId + '\'' +
+            ", randomPeerAddress='" + randomPeerAddress + '\'' +
+            '}';
     }
 
     @Override
@@ -41,7 +46,8 @@ public class RegisterResponse implements Message {
             dataOutputStream.close();
 
             return data;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             return new byte[0];
         }
@@ -60,7 +66,8 @@ public class RegisterResponse implements Message {
 
             byteArrayInputStream.close();
             dataInputStream.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }

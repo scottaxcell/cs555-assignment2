@@ -8,19 +8,19 @@ import java.net.Socket;
 public class RegisterRequest implements Message {
     private Socket socket;
     private String id;
-    private String ip;
+    private String address;
 
-    public RegisterRequest(String id, String ip) {
+    public RegisterRequest(String id, String address) {
         this.id = id;
-        this.ip = ip;
+        this.address = address;
     }
 
     @Override
     public String toString() {
         return "RegisterRequest{" +
-                "id='" + id + '\'' +
-                ", ip='" + ip + '\'' +
-                '}';
+            "id='" + id + '\'' +
+            ", address='" + address + '\'' +
+            '}';
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RegisterRequest implements Message {
 
             WireformatUtils.serializeInt(dataOutputStream, getProtocol());
             WireformatUtils.serializeString(dataOutputStream, id);
-            WireformatUtils.serializeString(dataOutputStream, ip);
+            WireformatUtils.serializeString(dataOutputStream, address);
 
             dataOutputStream.flush();
 
@@ -46,7 +46,8 @@ public class RegisterRequest implements Message {
             dataOutputStream.close();
 
             return data;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             return new byte[0];
         }
@@ -61,7 +62,7 @@ public class RegisterRequest implements Message {
 
             int protocol = WireformatUtils.deserializeInt(dataInputStream);
             id = WireformatUtils.deserializeString(dataInputStream);
-            ip = WireformatUtils.deserializeString(dataInputStream);
+            address = WireformatUtils.deserializeString(dataInputStream);
 
             byteArrayInputStream.close();
             dataInputStream.close();
@@ -76,6 +77,6 @@ public class RegisterRequest implements Message {
     }
 
     public Peer getPeer() {
-        return new Peer(id, ip);
+        return new Peer(id, address);
     }
 }

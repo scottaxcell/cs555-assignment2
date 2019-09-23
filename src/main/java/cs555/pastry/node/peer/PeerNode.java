@@ -35,7 +35,8 @@ public class PeerNode implements Node {
             discoveryNodeTcpConnection = new TcpConnection(socket, this);
             RegisterRequest request = new RegisterRequest(Utils.generateHexIdFromTimestamp(), Utils.getServerAddress(tcpServer));
             discoveryNodeTcpConnection.send(request.getBytes());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -54,6 +55,7 @@ public class PeerNode implements Node {
                 break;
             case Protocol.JOIN_REQUEST:
                 handleJoinRequest((JoinRequest) message);
+                break;
             case Protocol.JOIN_RESPONSE:
                 handleJoinResponse((JoinResponse) message);
                 break;
@@ -63,8 +65,10 @@ public class PeerNode implements Node {
     }
 
     private void handleJoinRequest(JoinRequest request) {
+        Utils.debug("recevied: " + request);
+
         if (distributedHashTable.getLeafSet().getLeftNeighborId().isEmpty() &&
-                distributedHashTable.getLeafSet().getRightNeighborId().isEmpty()) {
+            distributedHashTable.getLeafSet().getRightNeighborId().isEmpty()) {
             // request is for the second node to enter the network
             sendJoinResponse(request);
             return;
@@ -91,7 +95,7 @@ public class PeerNode implements Node {
             int tableRowIndex = route.size() - 1;
             routingTable[tableRowIndex] = nextTableRow;
 
-            JoinRequest joinRequest = new JoinRequest(destinationHexId, createUpdatedRoute(route), routingTable);
+            JoinRequest joinRequest = new JoinRequest(request.getSourceAddress(), destinationHexId, createUpdatedRoute(route), routingTable);
             Peer peer = distributedHashTable.getPeer(lookup);
             TcpConnection tcpConnection = getTcpConnection(peer.getAddress());
             if (tcpConnection != null) {
@@ -104,19 +108,18 @@ public class PeerNode implements Node {
     }
 
     private void sendJoinResponse(JoinRequest request) {
-        JoinResponse joinResponse = new JoinResponse(getHexId(), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
-        TcpConnection tcpConnection = getTcpConnection(request.getInitPeerAddress());
+        JoinResponse joinResponse = new JoinResponse(getHexId(), request.getSourceAddress(), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
+        TcpConnection tcpConnection = getTcpConnection(request.getSourceAddress());
         if (tcpConnection != null) {
+            Utils.debug("sending: " + joinResponse);
             tcpConnection.send(joinResponse.getBytes());
             // todo print join response
         }
     }
 
     private void handleJoinResponse(JoinResponse response) {
-        String destinationHexId = response.getDestinationHexId();
-        String lookup = distributedHashTable.lookup(destinationHexId);
-        List<String> route = response.getRoute();
-        Peer[][] routingTable = response.getRoutingTable();
+        Utils.debug("received: " + response);
+
         String[] leafSet = response.getLeafSet();
 
         if (leafSet[0].isEmpty() && leafSet[1].isEmpty()) {
@@ -131,6 +134,7 @@ public class PeerNode implements Node {
             // todo update and send leafset update
             // todo update routing table and send routing table update
         }
+
         // todo print diagnostics
         distributedHashTable.printState();
     }
@@ -143,14 +147,17 @@ public class PeerNode implements Node {
     }
 
     private void handleRegisterResponse(RegisterResponse response) {
+        Utils.debug("received: " + response);
+
         if (response.isRegistrationSuccess()) {
             Utils.info("registered with discovery node as " + response.getAssignedId());
-            Utils.info("joining DHT via random peer " + response.getRandomPeerId() + " @ " + response.getRandomPeerAddress());
+            if (!response.getRandomPeerId().isEmpty())
+                Utils.info("joining DHT via random peer " + response.getRandomPeerId() + " @ " + response.getRandomPeerAddress());
 
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
-            if (!randomPeerId.isEmpty() && !getHexId().equals(randomPeerId)) {
-                JoinRequest joinRequest = new JoinRequest(getHexId(), Collections.emptyList(), distributedHashTable.getRoutingTable());
+            if (!randomPeerId.isEmpty()) {
+                JoinRequest joinRequest = new JoinRequest(Utils.getServerAddress(tcpServer), getHexId(), Collections.singletonList(getHexId()), distributedHashTable.getRoutingTable());
                 TcpConnection tcpConnection = getTcpConnection(response.getRandomPeerAddress());
                 tcpConnection.send(joinRequest.getBytes());
             }

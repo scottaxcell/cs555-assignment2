@@ -41,7 +41,7 @@ public class DiscoveryNode implements Node {
         else {
             registerResponse.setRegistrationSuccess(true);
             registerResponse.setAssignedId(request.getPeer().getId());
-            Peer randomPeer = peers.getRandomPeer();
+            Peer randomPeer = peers.getRandomPeer(request.getPeer().getId());
             if (randomPeer != null) {
                 registerResponse.setRandomPeerId(randomPeer.getId());
                 registerResponse.setRandomPeerAddress(randomPeer.getAddress());

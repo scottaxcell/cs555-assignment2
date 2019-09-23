@@ -30,5 +30,6 @@ public class Main {
         hexIdDifference = Utils.getHexIdDecimalDifference(hexId2, hexId1);
         Utils.debug(hexIdDifference);
         hexIdDifference = Utils.getHexIdDecimalDifference("1AF3", "88AE");
-        Utils.debug(hexIdDifference);}
+        Utils.debug(hexIdDifference);
+    }
 }

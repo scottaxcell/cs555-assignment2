@@ -61,9 +61,9 @@ public class RoutingTable {
     @Override
     public String toString() {
         return "RoutingTable{" +
-                "hexId='" + hexId + '\'' +
-                ", table=" + Arrays.toString(table) +
-                '}';
+            "hexId='" + hexId + '\'' +
+            ", table=" + Arrays.toString(table) +
+            '}';
     }
 
     public void printState() {

@@ -6,15 +6,20 @@ import java.util.List;
 
 public class Lookup implements Message {
     private int protocol;
+    private String sourceAddress;
     private String destinationHexId;
     private List<String> route = new ArrayList<>();
 
-    public Lookup(String destinationHexId, List<String> route) {
-        this(Protocol.LOOKUP, destinationHexId, route);
+    public Lookup() {
     }
 
-    protected Lookup(int protocol, String destinationHexId, List<String> route) {
+    public Lookup(String sourceAddress, String destinationHexId, List<String> route) {
+        this(Protocol.LOOKUP, sourceAddress, destinationHexId, route);
+    }
+
+    protected Lookup(int protocol, String sourceAddress, String destinationHexId, List<String> route) {
         this.protocol = protocol;
+        this.sourceAddress = sourceAddress;
         this.destinationHexId = destinationHexId;
         this.route.addAll(route);
     }
@@ -28,12 +33,19 @@ public class Lookup implements Message {
 
             byteArrayInputStream.close();
             dataInputStream.close();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Lookup() {
+    public void deserialize(DataInputStream dataInputStream) {
+        protocol = WireformatUtils.deserializeInt(dataInputStream);
+        sourceAddress = WireformatUtils.deserializeString(dataInputStream);
+        destinationHexId = WireformatUtils.deserializeString(dataInputStream);
+        int numHops = WireformatUtils.deserializeInt(dataInputStream);
+        for (int i = 0; i < numHops; i++)
+            route.add(WireformatUtils.deserializeString(dataInputStream));
     }
 
     @Override
@@ -47,11 +59,7 @@ public class Lookup implements Message {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
 
-            WireformatUtils.serializeInt(dataOutputStream, getProtocol());
-            WireformatUtils.serializeString(dataOutputStream, destinationHexId);
-            WireformatUtils.serializeInt(dataOutputStream, route.size());
-            for (String peerId : route)
-                WireformatUtils.serializeString(dataOutputStream, peerId);
+            serialize(dataOutputStream);
 
             dataOutputStream.flush();
 
@@ -61,18 +69,20 @@ public class Lookup implements Message {
             dataOutputStream.close();
 
             return data;
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             return new byte[0];
         }
     }
 
-    public void deserialize(DataInputStream dataInputStream) {
-        protocol = WireformatUtils.deserializeInt(dataInputStream);
-        destinationHexId = WireformatUtils.deserializeString(dataInputStream);
-        int numHops = WireformatUtils.deserializeInt(dataInputStream);
-        for (int i = 0; i < numHops; i++)
-            route.add(WireformatUtils.deserializeString(dataInputStream));
+    protected void serialize(DataOutputStream dataOutputStream) {
+        WireformatUtils.serializeInt(dataOutputStream, getProtocol());
+        WireformatUtils.serializeString(dataOutputStream, sourceAddress);
+        WireformatUtils.serializeString(dataOutputStream, destinationHexId);
+        WireformatUtils.serializeInt(dataOutputStream, route.size());
+        for (String peerId : route)
+            WireformatUtils.serializeString(dataOutputStream, peerId);
     }
 
     public int getNumHops() {
@@ -83,7 +93,21 @@ public class Lookup implements Message {
         return route;
     }
 
+    public String getSourceAddress() {
+        return sourceAddress;
+    }
+
     public String getDestinationHexId() {
         return destinationHexId;
+    }
+
+    @Override
+    public String toString() {
+        return "Lookup{" +
+            "protocol=" + protocol +
+            ", sourceAddress='" + sourceAddress + '\'' +
+            ", destinationHexId='" + destinationHexId + '\'' +
+            ", route=" + route +
+            '}';
     }
 }
