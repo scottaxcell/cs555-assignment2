@@ -4,8 +4,9 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
+* ~~rename Ip interfaces to Address and serverAddress variables to address~~
 * file read/write on client and peer nodes
-* take another look at storing tcp connections in order to prevent creation of tons of tcp receiver threads
+* ~~take another look at storing tcp connections in order to prevent creation of tons of tcp receiver threads~~
 
 ### Discovery node
 * send alive heartbeats to connected peers, on disconnect update peer db
@@ -46,7 +47,7 @@ Implementing The Pastry Peer To Peer Network
 * peers that receive this message, update their own tables to incorporate new peer X
 ### Message requirements
 #### Register
-* request: hex id and ip
+* request: hex id and address
 * response: success, assigned hex id, random peer id
 
 #### Join
@@ -55,7 +56,7 @@ Implementing The Pastry Peer To Peer Network
 
 #### Lookup
 * request: route and hop count, destination
-* response: hex ip and ip ?
+* response: hex address and address ?
 
 #### Update DHT
 * DHT

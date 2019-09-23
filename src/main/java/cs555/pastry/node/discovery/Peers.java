@@ -32,7 +32,7 @@ public class Peers {
             return false;
 
         synchronized (peers) {
-            Utils.info("registered peer " + peer.getId() + " @ " + peer.getIp());
+            Utils.info("registered peer " + peer.getId() + " @ " + peer.getAddress());
             return peers.add(peer);
         }
     }

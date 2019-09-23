@@ -7,37 +7,37 @@ import java.io.DataOutputStream;
 
 public class Peer {
     private final String id;
-    private final String ip;
+    private final String address;
 
-    public Peer(String id, String ip) {
+    public Peer(String id, String address) {
         this.id = id;
-        this.ip = ip;
+        this.address = address;
     }
 
     public String getId() {
         return id;
     }
 
-    public String getIp() {
-        return ip;
+    public String getAddress() {
+        return address;
     }
 
     @Override
     public String toString() {
         return "Peer{" +
                 "id='" + id + '\'' +
-                ", ip='" + ip + '\'' +
+                ", address='" + address + '\'' +
                 '}';
     }
 
     public static Peer deserialize(DataInputStream dataInputStream) {
         String id = WireformatUtils.deserializeString(dataInputStream);
-        String ip = WireformatUtils.deserializeString(dataInputStream);
-        return new Peer(id, ip);
+        String address = WireformatUtils.deserializeString(dataInputStream);
+        return new Peer(id, address);
     }
 
     public void serialize(DataOutputStream dataOutputStream) {
         WireformatUtils.serializeString(dataOutputStream, getId());
-        WireformatUtils.serializeString(dataOutputStream, getIp());
+        WireformatUtils.serializeString(dataOutputStream, getAddress());
     }
 }

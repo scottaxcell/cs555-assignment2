@@ -20,10 +20,10 @@ public class TcpSender {
         }
     }
 
-    public static TcpSender of(String remoteServerAddress) {
-        String[] splitServerAddress = Utils.splitServerAddress(remoteServerAddress);
+    public static TcpSender of(String address) {
+        String[] splitAddress = Utils.splitAddress(address);
         try {
-            Socket socket = new Socket(splitServerAddress[0], Integer.valueOf(splitServerAddress[1]));
+            Socket socket = new Socket(splitAddress[0], Integer.valueOf(splitAddress[1]));
             return new TcpSender(socket);
         }
         catch (IOException e) {

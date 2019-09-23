@@ -101,10 +101,16 @@ public class Utils {
         return String.format("%s:%d", tcpServer.getIp(), tcpServer.getPort());
     }
 
-    public static String[] splitServerAddress(String serverAddress) {
-        if (serverAddress == null)
+    public static String[] splitAddress(String address) {
+        if (address == null)
             return new String[0];
-        return serverAddress.split(":");
+        return address.split(":");
+    }
+
+    public static String getIpFromAddress(String address) {
+        if (address == null)
+            return "";
+        return splitAddress(address)[0];
     }
 
     public static void sleep(long millis) {

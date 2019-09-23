@@ -4,7 +4,6 @@ import cs555.pastry.node.Node;
 import cs555.pastry.routing.DistributedHashTable;
 import cs555.pastry.routing.Peer;
 import cs555.pastry.transport.TcpConnection;
-import cs555.pastry.transport.TcpSender;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;
 import cs555.pastry.wireformats.*;
@@ -16,12 +15,16 @@ import java.util.Collections;
 import java.util.List;
 
 public class PeerNode implements Node {
+    private final int port;
     private final TcpServer tcpServer;
+    private TcpConnections tcpConnections;
     private TcpConnection discoveryNodeTcpConnection;
     private DistributedHashTable distributedHashTable;
 
     public PeerNode(int port, String discoveryNodeIp, int discoveryNodePort) {
+        this.port = port;
         tcpServer = new TcpServer(port, this);
+        tcpConnections = new TcpConnections(this);
 
         registerWithDiscoveryNode(discoveryNodeIp, discoveryNodePort);
     }
@@ -62,12 +65,12 @@ public class PeerNode implements Node {
     private void handleJoinRequest(JoinRequest request) {
         if (distributedHashTable.getLeafSet().getLeftNeighborId().isEmpty() &&
                 distributedHashTable.getLeafSet().getRightNeighborId().isEmpty()) {
-            // we are the second node to enter the network
+            // request is for the second node to enter the network
             sendJoinResponse(request);
             return;
         }
         else if (distributedHashTable.getLeafSet().getLeftNeighborId().equals(distributedHashTable.getLeafSet().getRightNeighborId())) {
-            // we are the thrid node to enter the network
+            // request is for the third node to enter the network
             sendJoinResponse(request);
             return;
         }
@@ -90,9 +93,11 @@ public class PeerNode implements Node {
 
             JoinRequest joinRequest = new JoinRequest(destinationHexId, createUpdatedRoute(route), routingTable);
             Peer peer = distributedHashTable.getPeer(lookup);
-            TcpSender tcpSender = TcpSender.of(peer.getIp());
-            if (tcpSender != null)
-                tcpSender.send(joinRequest.getBytes());
+            TcpConnection tcpConnection = getTcpConnection(peer.getAddress());
+            if (tcpConnection != null) {
+                tcpConnection.send(joinRequest.getBytes());
+                // todo print join request
+            }
         }
         else
             sendJoinResponse(request);
@@ -100,9 +105,11 @@ public class PeerNode implements Node {
 
     private void sendJoinResponse(JoinRequest request) {
         JoinResponse joinResponse = new JoinResponse(getHexId(), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
-        TcpSender tcpSender = TcpSender.of(request.getInitPeerIp());
-        if (tcpSender != null)
-            tcpSender.send(joinResponse.getBytes());
+        TcpConnection tcpConnection = getTcpConnection(request.getInitPeerAddress());
+        if (tcpConnection != null) {
+            tcpConnection.send(joinResponse.getBytes());
+            // todo print join response
+        }
     }
 
     private void handleJoinResponse(JoinResponse response) {
@@ -112,11 +119,20 @@ public class PeerNode implements Node {
         Peer[][] routingTable = response.getRoutingTable();
         String[] leafSet = response.getLeafSet();
 
-        // todo only node in network
-        // todo second node in network
-        //
-
-
+        if (leafSet[0].isEmpty() && leafSet[1].isEmpty()) {
+            // we are the second node to enter the network
+            // todo update and send leafset update
+        }
+        else if (leafSet[0].equals(leafSet[1])) {
+            // we are the third node to enter the network
+            // todo update and send leafset update
+        }
+        else {
+            // todo update and send leafset update
+            // todo update routing table and send routing table update
+        }
+        // todo print diagnostics
+        distributedHashTable.printState();
     }
 
     private List<String> createUpdatedRoute(List<String> route) {
@@ -129,20 +145,14 @@ public class PeerNode implements Node {
     private void handleRegisterResponse(RegisterResponse response) {
         if (response.isRegistrationSuccess()) {
             Utils.info("registered with discovery node as " + response.getAssignedId());
-            Utils.info("joining DHT via random peer " + response.getRandomPeerId());
+            Utils.info("joining DHT via random peer " + response.getRandomPeerId() + " @ " + response.getRandomPeerAddress());
 
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
             if (!randomPeerId.isEmpty() && !getHexId().equals(randomPeerId)) {
                 JoinRequest joinRequest = new JoinRequest(getHexId(), Collections.emptyList(), distributedHashTable.getRoutingTable());
-                String[] splitServerAddress = Utils.splitServerAddress(randomPeerId);
-                try {
-                    Socket socket = new Socket(splitServerAddress[0], Integer.parseInt(splitServerAddress[1]));
-                    TcpSender tcpSender = new TcpSender(socket);
-                    tcpSender.send(joinRequest.getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                TcpConnection tcpConnection = getTcpConnection(response.getRandomPeerAddress());
+                tcpConnection.send(joinRequest.getBytes());
             }
         }
         else {
@@ -153,6 +163,10 @@ public class PeerNode implements Node {
 
     private String getHexId() {
         return distributedHashTable.getHexId();
+    }
+
+    private TcpConnection getTcpConnection(String ip) {
+        return tcpConnections.getTcpConnection(ip);
     }
 
     @Override
@@ -174,5 +188,9 @@ public class PeerNode implements Node {
     private static void printHelpAndExit() {
         Utils.out("USAGE: java PeerNode <port> <discovery-node-host> <discovery-node-port>\n");
         System.exit(-1);
+    }
+
+    public int getPort() {
+        return port;
     }
 }

@@ -42,8 +42,10 @@ public class DiscoveryNode implements Node {
             registerResponse.setRegistrationSuccess(true);
             registerResponse.setAssignedId(request.getPeer().getId());
             Peer randomPeer = peers.getRandomPeer();
-            if (randomPeer != null)
+            if (randomPeer != null) {
                 registerResponse.setRandomPeerId(randomPeer.getId());
+                registerResponse.setRandomPeerAddress(randomPeer.getAddress());
+            }
         }
         Socket socket = request.getSocket();
         TcpSender tcpSender = new TcpSender(socket);

@@ -6,6 +6,7 @@ public class RegisterResponse implements Message {
     private boolean registrationSuccess = false;
     private String assignedId = "";
     private String randomPeerId = "";
+    private String randomPeerAddress = "";
 
     public RegisterResponse() {
     }
@@ -30,6 +31,7 @@ public class RegisterResponse implements Message {
             WireformatUtils.serializeBoolean(dataOutputStream, registrationSuccess);
             WireformatUtils.serializeString(dataOutputStream, assignedId);
             WireformatUtils.serializeString(dataOutputStream, randomPeerId);
+            WireformatUtils.serializeString(dataOutputStream, randomPeerAddress);
 
             dataOutputStream.flush();
 
@@ -54,6 +56,7 @@ public class RegisterResponse implements Message {
             registrationSuccess = WireformatUtils.deserializeBoolean(dataInputStream);
             assignedId = WireformatUtils.deserializeString(dataInputStream);
             randomPeerId = WireformatUtils.deserializeString(dataInputStream);
+            randomPeerAddress = WireformatUtils.deserializeString(dataInputStream);
 
             byteArrayInputStream.close();
             dataInputStream.close();
@@ -84,5 +87,13 @@ public class RegisterResponse implements Message {
 
     public void setRandomPeerId(String randomPeerId) {
         this.randomPeerId = randomPeerId;
+    }
+
+    public String getRandomPeerAddress() {
+        return randomPeerAddress;
+    }
+
+    public void setRandomPeerAddress(String randomPeerAddress) {
+        this.randomPeerAddress = randomPeerAddress;
     }
 }

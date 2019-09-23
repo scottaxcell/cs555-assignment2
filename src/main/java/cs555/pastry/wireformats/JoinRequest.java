@@ -102,7 +102,7 @@ public class JoinRequest extends Lookup {
     /**
      * ip for the peer that originated this join request
      */
-    public String getInitPeerIp() {
+    public String getInitPeerAddress() {
         return getRoute().get(0);
     }
 }
