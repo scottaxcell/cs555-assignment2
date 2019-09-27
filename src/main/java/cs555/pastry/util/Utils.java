@@ -110,6 +110,8 @@ public class Utils {
     public static String getIpFromAddress(String address) {
         if (address == null)
             return "";
+        if (address.startsWith("/"))
+            return splitAddress(address.substring(1))[0];
         return splitAddress(address)[0];
     }
 

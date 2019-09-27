@@ -115,9 +115,9 @@ public class JoinRequest extends Lookup {
     }
 
     /**
-     * ip for the peer that originated this join request
+     * id for the peer that originated this join request
      */
-    public String getInitPeerAddress() {
+    public String getInitPeerId() {
         return getRoute().get(0);
     }
 

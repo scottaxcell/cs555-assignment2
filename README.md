@@ -33,6 +33,7 @@ Implementing The Pastry Peer To Peer Network
     * print success/fail of file operation
 
 ## Notes
+* All peers are assumed to have the same port, this is vital.
 * store connected peer tcp connections using the registration id
 ### Join protocol
 * new peer (X), get random peer (A) from discovery node

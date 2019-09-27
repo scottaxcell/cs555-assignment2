@@ -4,10 +4,12 @@ import cs555.pastry.routing.LeafSet;
 import cs555.pastry.routing.Peer;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 
 public class JoinResponse extends JoinRequest {
+    private Socket socket;
     private String[] leafSet = new String[2];
 
     public JoinResponse(String sourceAddress, String destinationHexId, List<String> route, LeafSet leafSet, Peer[][] routingTable) {
@@ -16,8 +18,9 @@ public class JoinResponse extends JoinRequest {
         this.leafSet[1] = leafSet.getRightNeighborId();
     }
 
-    public JoinResponse(byte[] bytes) {
+    public JoinResponse(byte[] bytes, Socket socket) {
         super();
+        this.socket = socket;
 
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
@@ -40,12 +43,12 @@ public class JoinResponse extends JoinRequest {
         leafSet[1] = WireformatUtils.deserializeString(dataInputStream);
     }
 
-    @java.lang.Override
+    @Override
     public int getProtocol() {
         return super.getProtocol();
     }
 
-    @java.lang.Override
+    @Override
     public byte[] getBytes() {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -89,5 +92,9 @@ public class JoinResponse extends JoinRequest {
             ", table=" + Arrays.toString(getRoutingTable()) +
             ", leafSet=" + Arrays.toString(leafSet) +
             '}';
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

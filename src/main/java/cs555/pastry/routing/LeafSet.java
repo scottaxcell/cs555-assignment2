@@ -30,6 +30,14 @@ public class LeafSet {
         return getLeftNeighbor() != null ? getLeftNeighbor().getId() : "";
     }
 
+    public String getRightNeighborAddress() {
+        return getRightNeighbor() != null ? getRightNeighbor().getAddress() : "";
+    }
+
+    public String getLeftNeighborAddress() {
+        return getLeftNeighbor() != null ? getLeftNeighbor().getAddress() : "";
+    }
+
     @Override
     public String toString() {
         return "LeafSet{" +

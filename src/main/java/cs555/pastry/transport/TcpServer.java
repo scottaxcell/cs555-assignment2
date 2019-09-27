@@ -16,7 +16,7 @@ public class TcpServer implements Runnable {
         this.node = node;
         try {
             serverSocket = new ServerSocket(port);
-            Utils.info(String.format("%s TCP server started on %s:%d", node.getNodeTypeAsString(), getIp(), getPort()));
+            Utils.info(String.format("%s TCP server started on %s:%d (%s)", node.getNodeTypeAsString(), getIp(), getPort(), serverSocket.getInetAddress().getLocalHost().getHostAddress()));
         }
         catch (IOException e) {
             e.printStackTrace();

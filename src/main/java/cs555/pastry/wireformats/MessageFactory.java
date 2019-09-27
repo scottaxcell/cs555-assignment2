@@ -20,7 +20,9 @@ public class MessageFactory {
             case Protocol.JOIN_REQUEST:
                 return new JoinRequest(data);
             case Protocol.JOIN_RESPONSE:
-                return new JoinResponse(data);
+                return new JoinResponse(data, socket);
+            case Protocol.LEAF_SET_UPDATE:
+                return new LeafSetUpdate(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }

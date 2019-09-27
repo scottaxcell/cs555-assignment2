@@ -2,6 +2,7 @@ package cs555.pastry.node.peer;
 
 import cs555.pastry.node.Node;
 import cs555.pastry.routing.DistributedHashTable;
+import cs555.pastry.routing.LeafSet;
 import cs555.pastry.routing.Peer;
 import cs555.pastry.transport.TcpConnection;
 import cs555.pastry.transport.TcpServer;
@@ -17,7 +18,7 @@ import java.util.List;
 public class PeerNode implements Node {
     private final int port;
     private final TcpServer tcpServer;
-    private TcpConnections tcpConnections;
+    private final TcpConnections tcpConnections;
     private TcpConnection discoveryNodeTcpConnection;
     private DistributedHashTable distributedHashTable;
 
@@ -33,7 +34,7 @@ public class PeerNode implements Node {
         try {
             Socket socket = new Socket(discoveryNodeIp, discoveryNodePort);
             discoveryNodeTcpConnection = new TcpConnection(socket, this);
-            RegisterRequest request = new RegisterRequest(Utils.generateHexIdFromTimestamp(), Utils.getServerAddress(tcpServer));
+            RegisterRequest request = new RegisterRequest(Utils.generateHexIdFromTimestamp(), Utils.getIpFromAddress(socket.getLocalSocketAddress().toString()));
             discoveryNodeTcpConnection.send(request.getBytes());
         }
         catch (IOException e) {
@@ -59,9 +60,18 @@ public class PeerNode implements Node {
             case Protocol.JOIN_RESPONSE:
                 handleJoinResponse((JoinResponse) message);
                 break;
+            case Protocol.LEAF_SET_UPDATE:
+                handleLeafSetUpdate((LeafSetUpdate) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleLeafSetUpdate(LeafSetUpdate update) {
+        Utils.debug("recevied: " + update);
+
+        // todo print leaf set changed diagnostic
     }
 
     private void handleJoinRequest(JoinRequest request) {
@@ -108,7 +118,7 @@ public class PeerNode implements Node {
     }
 
     private void sendJoinResponse(JoinRequest request) {
-        JoinResponse joinResponse = new JoinResponse(getHexId(), request.getSourceAddress(), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
+        JoinResponse joinResponse = new JoinResponse(request.getSourceAddress(), request.getInitPeerId(), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
         TcpConnection tcpConnection = getTcpConnection(request.getSourceAddress());
         if (tcpConnection != null) {
             Utils.debug("sending: " + joinResponse);
@@ -125,6 +135,21 @@ public class PeerNode implements Node {
         if (leafSet[0].isEmpty() && leafSet[1].isEmpty()) {
             // we are the second node to enter the network
             // todo update and send leafset update
+            Socket socket = response.getSocket();
+            String sourceAddress = Utils.getIpFromAddress(socket.getRemoteSocketAddress().toString());
+            Peer peer = new Peer(response.getLastHopIp(), sourceAddress);
+            distributedHashTable.setLeftNeighbor(peer);
+            distributedHashTable.setRightNeighbor(peer);
+
+            TcpConnection tcpConnection = tcpConnections.getTcpConnection(sourceAddress);
+            if (tcpConnection != null) {
+                Peer me = new Peer(getHexId(), tcpConnection.getLocalSocketAddress());
+                LeafSet wireLeafSet = new LeafSet();
+                wireLeafSet.setLeftNeighbor(me);
+                wireLeafSet.setRightNeighbor(me);
+                LeafSetUpdate leafSetUpdate = new LeafSetUpdate(wireLeafSet);
+                tcpConnection.send(leafSetUpdate.getBytes());
+            }
         }
         else if (leafSet[0].equals(leafSet[1])) {
             // we are the third node to enter the network
@@ -157,13 +182,13 @@ public class PeerNode implements Node {
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
             if (!randomPeerId.isEmpty()) {
-                JoinRequest joinRequest = new JoinRequest(Utils.getServerAddress(tcpServer), getHexId(), Collections.singletonList(getHexId()), distributedHashTable.getRoutingTable());
+                JoinRequest joinRequest = new JoinRequest(discoveryNodeTcpConnection.getLocalSocketAddress(), getHexId(), Collections.singletonList(getHexId()), distributedHashTable.getRoutingTable());
                 TcpConnection tcpConnection = getTcpConnection(response.getRandomPeerAddress());
                 tcpConnection.send(joinRequest.getBytes());
             }
         }
         else {
-            RegisterRequest registerRequest = new RegisterRequest(Utils.generateHexIdFromTimestamp(), Utils.getServerAddress(tcpServer));
+            RegisterRequest registerRequest = new RegisterRequest(Utils.generateHexIdFromTimestamp(), discoveryNodeTcpConnection.getLocalSocketAddress());
             discoveryNodeTcpConnection.send(registerRequest.getBytes());
         }
     }
