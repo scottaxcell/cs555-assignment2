@@ -6,7 +6,15 @@ public class LeafSet {
     private Peer leftNeighbor;
     private Peer rightNeghbor;
 
-    private Peer getLeftNeighbor() {
+    public LeafSet() {
+    }
+
+    public LeafSet(Peer leftNeighbor, Peer rightNeghbor) {
+        this.leftNeighbor = leftNeighbor;
+        this.rightNeghbor = rightNeghbor;
+    }
+
+    public Peer getLeftNeighbor() {
         return leftNeighbor;
     }
 
@@ -14,7 +22,7 @@ public class LeafSet {
         this.leftNeighbor = leftNeighbor;
     }
 
-    private Peer getRightNeighbor() {
+    public Peer getRightNeighbor() {
         return rightNeghbor;
     }
 

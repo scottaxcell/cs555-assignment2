@@ -71,6 +71,9 @@ public class PeerNode implements Node {
     private void handleLeafSetUpdate(LeafSetUpdate update) {
         Utils.debug("recevied: " + update);
 
+        distributedHashTable.setLeftNeighbor(update.getLeafSet().getLeftNeighbor());
+        distributedHashTable.setRightNeighbor(update.getLeafSet().getRightNeighbor());
+
         // todo print leaf set changed diagnostic
     }
 
@@ -130,11 +133,10 @@ public class PeerNode implements Node {
     private void handleJoinResponse(JoinResponse response) {
         Utils.debug("received: " + response);
 
-        String[] leafSet = response.getLeafSet();
+        LeafSet leafSet = response.getLeafSet();
 
-        if (leafSet[0].isEmpty() && leafSet[1].isEmpty()) {
+        if (leafSet.getLeftNeighborId().isEmpty() && leafSet.getRightNeighborId().isEmpty()) {
             // we are the second node to enter the network
-            // todo update and send leafset update
             Socket socket = response.getSocket();
             String sourceAddress = Utils.getIpFromAddress(socket.getRemoteSocketAddress().toString());
             Peer peer = new Peer(response.getLastHopIp(), sourceAddress);
@@ -144,16 +146,21 @@ public class PeerNode implements Node {
             TcpConnection tcpConnection = tcpConnections.getTcpConnection(sourceAddress);
             if (tcpConnection != null) {
                 Peer me = new Peer(getHexId(), tcpConnection.getLocalSocketAddress());
-                LeafSet wireLeafSet = new LeafSet();
-                wireLeafSet.setLeftNeighbor(me);
-                wireLeafSet.setRightNeighbor(me);
+                LeafSet wireLeafSet = new LeafSet(me, me);
                 LeafSetUpdate leafSetUpdate = new LeafSetUpdate(wireLeafSet);
                 tcpConnection.send(leafSetUpdate.getBytes());
             }
         }
-        else if (leafSet[0].equals(leafSet[1])) {
+        else if (leafSet.getLeftNeighborId().equals(leafSet.getRightNeighborId())) {
             // we are the third node to enter the network
             // todo update and send leafset update
+            // leafSet points to B
+            // message came from A
+            // connect to C
+            TcpConnection tcpConnection = tcpConnections.getTcpConnection(response.getSourceAddress());
+            if (tcpConnection != null) {
+
+            }
         }
         else {
             // todo update and send leafset update
@@ -165,8 +172,7 @@ public class PeerNode implements Node {
     }
 
     private List<String> createUpdatedRoute(List<String> route) {
-        List<String> r = new ArrayList<>();
-        r.addAll(route);
+        List<String> r = new ArrayList<>(route);
         r.add(getHexId());
         return r;
     }

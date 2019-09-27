@@ -10,12 +10,11 @@ import java.util.List;
 
 public class JoinResponse extends JoinRequest {
     private Socket socket;
-    private String[] leafSet = new String[2];
+    private LeafSet leafSet = new LeafSet();
 
     public JoinResponse(String sourceAddress, String destinationHexId, List<String> route, LeafSet leafSet, Peer[][] routingTable) {
         super(Protocol.JOIN_RESPONSE, sourceAddress, destinationHexId, route, routingTable);
-        this.leafSet[0] = leafSet.getLeftNeighborId();
-        this.leafSet[1] = leafSet.getRightNeighborId();
+        this.leafSet = leafSet;
     }
 
     public JoinResponse(byte[] bytes, Socket socket) {
@@ -39,8 +38,13 @@ public class JoinResponse extends JoinRequest {
     public void deserialize(DataInputStream dataInputStream) {
         super.deserialize(dataInputStream);
 
-        leafSet[0] = WireformatUtils.deserializeString(dataInputStream);
-        leafSet[1] = WireformatUtils.deserializeString(dataInputStream);
+        String leftNeighborId = WireformatUtils.deserializeString(dataInputStream);
+        String leftNeighborAddress = WireformatUtils.deserializeString(dataInputStream);
+        String rightNeighborId = WireformatUtils.deserializeString(dataInputStream);
+        String rightNeighborAddress = WireformatUtils.deserializeString(dataInputStream);
+
+        leafSet.setLeftNeighbor(new Peer(leftNeighborId, leftNeighborAddress));
+        leafSet.setRightNeighbor(new Peer(rightNeighborId, rightNeighborAddress));
     }
 
     @Override
@@ -74,11 +78,13 @@ public class JoinResponse extends JoinRequest {
     protected void serialize(DataOutputStream dataOutputStream) {
         super.serialize(dataOutputStream);
 
-        WireformatUtils.serializeString(dataOutputStream, leafSet[0]);
-        WireformatUtils.serializeString(dataOutputStream, leafSet[1]);
+        WireformatUtils.serializeString(dataOutputStream, leafSet.getLeftNeighborId());
+        WireformatUtils.serializeString(dataOutputStream, leafSet.getLeftNeighborAddress());
+        WireformatUtils.serializeString(dataOutputStream, leafSet.getRightNeighborId());
+        WireformatUtils.serializeString(dataOutputStream, leafSet.getRightNeighborAddress());
     }
 
-    public String[] getLeafSet() {
+    public LeafSet getLeafSet() {
         return leafSet;
     }
 
@@ -90,7 +96,7 @@ public class JoinResponse extends JoinRequest {
             ", destinationHexId='" + getDestinationHexId() + '\'' +
             ", route=" + getRoute() +
             ", table=" + Arrays.toString(getRoutingTable()) +
-            ", leafSet=" + Arrays.toString(leafSet) +
+            ", leafSet=" + leafSet +
             '}';
     }
 
