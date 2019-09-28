@@ -8,6 +8,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class RoutingTableTest {
     private RoutingTable routingTable = new RoutingTable("65a1");
 
@@ -52,5 +57,24 @@ public class RoutingTableTest {
     @Test
     public void toStringTest() {
         Utils.debug("\n" + routingTable);
+    }
+
+    @Test
+    public void comparatorTest() {
+        List<String> ids = new ArrayList<>();
+        ids.add("1111");
+        ids.add("0032");
+        ids.add("65a1");
+        Utils.debug(Arrays.toString(ids.toArray(new String[0])));
+        Collections.sort(ids, (a, b) -> Utils.getHexIdDecimalDifference(a, b) > 0 ? 1 : Utils.getHexIdDecimalDifference(b, a) > 0 ? -1 : 0);
+        Utils.debug(Arrays.toString(ids.toArray(new String[0])));
+
+        ids.clear();
+        ids.add("3635");
+        ids.add("3937");
+        ids.add("3218");
+        Utils.debug(Arrays.toString(ids.toArray(new String[0])));
+        Collections.sort(ids, (a, b) -> Utils.getHexIdDecimalDifference(a, b) > 0 ? 1 : Utils.getHexIdDecimalDifference(b, a) > 0 ? -1 : 0);
+        Utils.debug(Arrays.toString(ids.toArray(new String[0])));
     }
 }

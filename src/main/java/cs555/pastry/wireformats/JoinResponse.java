@@ -103,4 +103,8 @@ public class JoinResponse extends JoinRequest {
     public Socket getSocket() {
         return socket;
     }
+
+    public String getRemoteSocketAddress() {
+        return getSocket().getRemoteSocketAddress().toString();
+    }
 }

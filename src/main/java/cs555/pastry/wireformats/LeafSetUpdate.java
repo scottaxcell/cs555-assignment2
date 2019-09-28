@@ -1,15 +1,16 @@
 package cs555.pastry.wireformats;
 
-import cs555.pastry.routing.LeafSet;
 import cs555.pastry.routing.Peer;
 
 import java.io.*;
 
 public class LeafSetUpdate implements Message {
-    private LeafSet leafSet = new LeafSet();
+    private Peer peer;
+    private boolean isLeftNeighbor;
 
-    public LeafSetUpdate(LeafSet leafSet) {
-        this.leafSet = leafSet;
+    public LeafSetUpdate(Peer peer, boolean isLeftNeighbor) {
+        this.peer = peer;
+        this.isLeftNeighbor = isLeftNeighbor;
     }
 
     public LeafSetUpdate(byte[] bytes) {
@@ -29,13 +30,10 @@ public class LeafSetUpdate implements Message {
 
     public void deserialize(DataInputStream dataInputStream) {
         int protocol = WireformatUtils.deserializeInt(dataInputStream);
-        String leftNeighborId = WireformatUtils.deserializeString(dataInputStream);
-        String leftNeighborAddress = WireformatUtils.deserializeString(dataInputStream);
-        String rightNeighborId = WireformatUtils.deserializeString(dataInputStream);
-        String rightNeighborAddress = WireformatUtils.deserializeString(dataInputStream);
-
-        leafSet.setLeftNeighbor(new Peer(leftNeighborId, leftNeighborAddress));
-        leafSet.setRightNeighbor(new Peer(rightNeighborId, rightNeighborAddress));
+        String id = WireformatUtils.deserializeString(dataInputStream);
+        String address = WireformatUtils.deserializeString(dataInputStream);
+        peer = new Peer(id, address);
+        isLeftNeighbor = WireformatUtils.deserializeBoolean(dataInputStream);
     }
 
     @Override
@@ -69,19 +67,23 @@ public class LeafSetUpdate implements Message {
     @Override
     public String toString() {
         return "LeafSetUpdate{" +
-            "leafSet=" + leafSet +
+            "peer=" + peer +
+            ", isLeftNeighbor=" + isLeftNeighbor +
             '}';
     }
 
     protected void serialize(DataOutputStream dataOutputStream) {
         WireformatUtils.serializeInt(dataOutputStream, getProtocol());
-        WireformatUtils.serializeString(dataOutputStream, leafSet.getLeftNeighborId());
-        WireformatUtils.serializeString(dataOutputStream, leafSet.getLeftNeighborAddress());
-        WireformatUtils.serializeString(dataOutputStream, leafSet.getRightNeighborId());
-        WireformatUtils.serializeString(dataOutputStream, leafSet.getRightNeighborAddress());
+        WireformatUtils.serializeString(dataOutputStream, peer.getId());
+        WireformatUtils.serializeString(dataOutputStream, peer.getAddress());
+        WireformatUtils.serializeBoolean(dataOutputStream, isLeftNeighbor);
     }
 
-    public LeafSet getLeafSet() {
-        return leafSet;
+    public Peer getPeer() {
+        return peer;
+    }
+
+    public boolean isLeftNeighbor() {
+        return isLeftNeighbor;
     }
 }

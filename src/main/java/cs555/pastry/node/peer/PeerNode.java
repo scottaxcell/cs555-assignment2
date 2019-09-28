@@ -71,10 +71,12 @@ public class PeerNode implements Node {
     private void handleLeafSetUpdate(LeafSetUpdate update) {
         Utils.debug("recevied: " + update);
 
-        distributedHashTable.setLeftNeighbor(update.getLeafSet().getLeftNeighbor());
-        distributedHashTable.setRightNeighbor(update.getLeafSet().getRightNeighbor());
+        if (update.isLeftNeighbor())
+            distributedHashTable.setLeftNeighbor(update.getPeer());
+        else
+            distributedHashTable.setRightNeighbor(update.getPeer());
 
-        // todo print leaf set changed diagnostic
+        distributedHashTable.printState();
     }
 
     private void handleJoinRequest(JoinRequest request) {
@@ -137,29 +139,71 @@ public class PeerNode implements Node {
 
         if (leafSet.getLeftNeighborId().isEmpty() && leafSet.getRightNeighborId().isEmpty()) {
             // we are the second node to enter the network
-            Socket socket = response.getSocket();
-            String sourceAddress = Utils.getIpFromAddress(socket.getRemoteSocketAddress().toString());
-            Peer peer = new Peer(response.getLastHopIp(), sourceAddress);
+            String sourceAddress = Utils.getIpFromAddress(response.getRemoteSocketAddress());
+            Peer peer = new Peer(response.getLastHopPeerId(), sourceAddress);
             distributedHashTable.setLeftNeighbor(peer);
             distributedHashTable.setRightNeighbor(peer);
 
             TcpConnection tcpConnection = tcpConnections.getTcpConnection(sourceAddress);
             if (tcpConnection != null) {
                 Peer me = new Peer(getHexId(), tcpConnection.getLocalSocketAddress());
-                LeafSet wireLeafSet = new LeafSet(me, me);
-                LeafSetUpdate leafSetUpdate = new LeafSetUpdate(wireLeafSet);
-                tcpConnection.send(leafSetUpdate.getBytes());
+                tcpConnection.send(new LeafSetUpdate(me, true).getBytes());
+                tcpConnection.send(new LeafSetUpdate(me, false).getBytes());
             }
         }
         else if (leafSet.getLeftNeighborId().equals(leafSet.getRightNeighborId())) {
             // we are the third node to enter the network
-            // todo update and send leafset update
-            // leafSet points to B
-            // message came from A
-            // connect to C
-            TcpConnection tcpConnection = tcpConnections.getTcpConnection(response.getSourceAddress());
-            if (tcpConnection != null) {
+            String sourceId = response.getLastHopPeerId();
+            String otherId = leafSet.getLeftNeighborId();
 
+            TcpConnection sourceTcpConnection = getTcpConnection(response.getRemoteSocketAddress());
+            TcpConnection otherTcpConnection = getTcpConnection(leafSet.getLeftNeighborAddress());
+
+            Peer me = new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress());
+            Peer otherPeer = new Peer(leafSet.getLeftNeighborId(), leafSet.getLeftNeighborAddress());
+            Peer sourcePeer = new Peer(sourceId, response.getRemoteSocketAddress());
+
+            boolean isSourceLowerThanOther = Utils.getHexIdDecimalDifference(otherId, sourceId) > 0;
+            if ((Utils.getHexIdDecimalDifference(getHexId(), sourceId) > 0 && Utils.getHexIdDecimalDifference(otherId, getHexId()) > 0) ||
+                (Utils.getHexIdDecimalDifference(getHexId(), otherId) > 0 && Utils.getHexIdDecimalDifference(sourceId, getHexId()) > 0)) {
+                if (isSourceLowerThanOther) {
+                    // S < X < O
+                    Utils.debug("S < X < O");
+                    Utils.debug(sourceId + " < " + getHexId() + " < " + otherId);
+                    distributedHashTable.setLeftNeighbor(sourcePeer);
+                    distributedHashTable.setRightNeighbor(otherPeer);
+                    sourceTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
+                    otherTcpConnection.send(new LeafSetUpdate(me, true).getBytes());
+                }
+                else {
+                    // O < X < S
+                    Utils.debug("O < X < S");
+                    Utils.debug(otherId + " < " + getHexId() + " < " + sourceId);
+                    distributedHashTable.setLeftNeighbor(otherPeer);
+                    distributedHashTable.setRightNeighbor(sourcePeer);
+                    otherTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
+                    sourceTcpConnection.send(new LeafSetUpdate(me, true).getBytes());
+                }
+            }
+            else {
+                if (isSourceLowerThanOther) {
+                    // S < O < X || X < S < O
+                    Utils.debug("S < O < X || X < S < O");
+                    Utils.debug(sourceId + " < " + otherId + " < " + getHexId() + " || " + getHexId() + " < " + sourceId + " < " + otherId);
+                    distributedHashTable.setLeftNeighbor(otherPeer);
+                    distributedHashTable.setRightNeighbor(sourcePeer);
+                    otherTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
+                    sourceTcpConnection.send(new LeafSetUpdate(me, true).getBytes());
+                }
+                else {
+                    // O < S < X || X < O < S
+                    Utils.debug("O < S < X || X < O < S");
+                    Utils.debug(otherId + " < " + sourceId + " < " + getHexId() + " || " + getHexId() + " < " + otherId + " < " + sourceId);
+                    distributedHashTable.setLeftNeighbor(sourcePeer);
+                    distributedHashTable.setRightNeighbor(otherPeer);
+                    sourceTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
+                    otherTcpConnection.send(new LeafSetUpdate(me, true).getBytes());
+                }
             }
         }
         else {

@@ -1,7 +1,5 @@
 package cs555.pastry.util;
 
-import cs555.pastry.transport.TcpServer;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 
@@ -95,11 +93,11 @@ public class Utils {
         return Math.abs(getHexIdDecimalDifference(hexId1, hexId2));
     }
 
-    public static String getServerAddress(TcpServer tcpServer) {
-        if (tcpServer == null)
-            return "";
-        return String.format("%s:%d", tcpServer.getIp(), tcpServer.getPort());
-    }
+//    public static String getServerAddress(TcpServer tcpServer) {
+//        if (tcpServer == null)
+//            return "";
+//        return String.format("%s:%d", tcpServer.getIp(), tcpServer.getPort());
+//    }
 
     public static String[] splitAddress(String address) {
         if (address == null)
