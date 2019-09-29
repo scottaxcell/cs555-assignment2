@@ -98,22 +98,34 @@ public class PeerNode implements Node {
         List<String> route = request.getRoute();
         Peer[][] routingTable = request.getRoutingTable();
 
+        if (route.contains(getHexId())) {
+            Utils.error("i've seen this message before!");
+            return;
+        }
+
         String lookup = distributedHashTable.lookup(destinationHexId);
+        Utils.debug("lookup for destination (" + destinationHexId + "): " + lookup);
         if (lookup.isEmpty()) {
             Utils.error("lookup failed for: " + destinationHexId);
             new Exception().printStackTrace();
             return;
         }
 
-        if (!destinationHexId.equals(lookup)) {
+        if (!getHexId().equals(lookup)) {
             Peer[] nextTableRow = distributedHashTable.getTableRow(destinationHexId);
             int tableRowIndex = route.size() - 1;
             routingTable[tableRowIndex] = nextTableRow;
 
             JoinRequest joinRequest = new JoinRequest(request.getSourceAddress(), destinationHexId, createUpdatedRoute(route), routingTable);
             Peer peer = distributedHashTable.getPeer(lookup);
+            if (peer == null) {
+                Utils.error("failed to get peer using hex id: " + lookup);
+                distributedHashTable.printState();
+                return;
+            }
             TcpConnection tcpConnection = getTcpConnection(peer.getAddress());
             if (tcpConnection != null) {
+                Utils.debug("sending: " + joinRequest);
                 tcpConnection.send(joinRequest.getBytes());
                 // todo print join request
             }

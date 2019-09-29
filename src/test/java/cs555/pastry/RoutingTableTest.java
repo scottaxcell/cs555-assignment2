@@ -77,4 +77,24 @@ public class RoutingTableTest {
         Collections.sort(ids, (a, b) -> Utils.getHexIdDecimalDifference(a, b) > 0 ? 1 : Utils.getHexIdDecimalDifference(b, a) > 0 ? -1 : 0);
         Utils.debug(Arrays.toString(ids.toArray(new String[0])));
     }
+
+    @Test
+    public void closestComparatorTest() {
+        List<String> peers = new ArrayList<>();
+        peers.add("3739");
+        peers.add("3534");
+        peers.add("3939");
+        Utils.debug(Arrays.toString(peers.toArray(new String[0])));
+        Collections.sort(peers, (hexId1, hexId2) -> {
+            int absoluteHexDiff1 = Utils.getAbsoluteHexIdDecimalDifference("3438", hexId1);
+            int absoluteHexDiff2 = Utils.getAbsoluteHexIdDecimalDifference("3438", hexId2);
+            if (absoluteHexDiff2 < absoluteHexDiff1)
+                return 1;
+            else if (absoluteHexDiff1 < absoluteHexDiff2)
+                return -1;
+            else
+                return Utils.getHexIdDecimalDifference(hexId1, hexId2) > 0 ? -1 : 1;
+        });
+        Utils.debug(Arrays.toString(peers.toArray(new String[0])));
+    }
 }

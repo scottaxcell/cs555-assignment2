@@ -1,9 +1,12 @@
 package cs555.pastry.util;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Date;
 
 public class Utils {
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
     public static final int HEXADECIMAL_RADIX = 16;
     public static final int NUM_16_BIT_ID_DIGITS = 4;
     private static boolean debug = true;
@@ -25,7 +28,7 @@ public class Utils {
 
     public static void debug(Object o) {
         if (debug)
-            System.out.println("DEBUG: " + o);
+            System.out.println(String.format("DEBUG %s: %s", SIMPLE_DATE_FORMAT.format(new Date()), o));
     }
 
     public static void error(Object o) {

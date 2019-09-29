@@ -2,6 +2,9 @@ package cs555.pastry.routing;
 
 import cs555.pastry.util.Utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DistributedHashTable {
     private final String hexId;
     private final LeafSet leafSet;
@@ -19,27 +22,56 @@ public class DistributedHashTable {
             && Utils.getHexIdDecimalDifference(leafSet.getRightNeighborId(), destHexId) > 0) {
             return hexId;
         }
-        // if L0 == D, return L0
-        if (leafSet.getLeftNeighborId().equals(destHexId))
-            return leafSet.getLeftNeighborId();
-
-        // if L1 == D, return L1
-        if (leafSet.getRightNeighborId().equals(destHexId))
-            return leafSet.getRightNeighborId();
-
-        String nextPeerId = routingTable.lookup(destHexId);
-        if (!nextPeerId.isEmpty())
-            return nextPeerId;
         else {
-            // return closest neighbor in leaf set
-            int leftNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getLeftNeighborId());
-            int rightNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getRightNeighborId());
-            if (leftNeighborHexIdDecimalDifference < rightNeighborHexIdDecimalDifference)
-                return leafSet.getRightNeighborId();
-            else
-                return leafSet.getLeftNeighborId();
+            List<String> peers = new ArrayList<>();
+            peers.add(hexId);
+
+            if (!leafSet.getLeftNeighborId().isEmpty())
+                peers.add(leafSet.getLeftNeighborId());
+
+            if (!leafSet.getRightNeighborId().isEmpty())
+                peers.add(leafSet.getRightNeighborId());
+
+            String nextPeerId = routingTable.lookup(destHexId);
+            if (!nextPeerId.isEmpty())
+                peers.add(nextPeerId);
+
+            // sort peers by closest hex id value
+            peers.sort((hexId1, hexId2) -> {
+                int absoluteHexDiff1 = Utils.getAbsoluteHexIdDecimalDifference(destHexId, hexId1);
+                int absoluteHexDiff2 = Utils.getAbsoluteHexIdDecimalDifference(destHexId, hexId2);
+                if (absoluteHexDiff2 < absoluteHexDiff1)
+                    return 1;
+                else if (absoluteHexDiff1 < absoluteHexDiff2)
+                    return -1;
+                else
+                    return Utils.getHexIdDecimalDifference(hexId1, hexId2) > 0 ? -1 : 1;
+            });
+
+            return peers.get(0);
         }
     }
+//        // if L0 == D, return L0
+//        if (leafSet.getLeftNeighborId().equals(destHexId))
+//            return leafSet.getLeftNeighborId();
+//
+//        // if L1 == D, return L1
+//        if (leafSet.getRightNeighborId().equals(destHexId))
+//            return leafSet.getRightNeighborId();
+//
+//        String nextPeerId = routingTable.lookup(destHexId);
+//        if (!nextPeerId.isEmpty())
+//            return nextPeerId;
+//        else {
+//            // return closest neighbor in leaf set
+//            int leftNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getLeftNeighborId());
+//            int rightNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getRightNeighborId());
+//            if (leftNeighborHexIdDecimalDifference < rightNeighborHexIdDecimalDifference)
+//                return leafSet.getRightNeighborId();
+//            else
+//                return leafSet.getLeftNeighborId();
+//        }
+//        }
 
     public void updateRoutingTable(Peer peer) {
         routingTable.update(peer);
@@ -64,7 +96,10 @@ public class DistributedHashTable {
     }
 
     public Peer getPeer(String hexId) {
-        return routingTable.getPeer(hexId);
+        Peer peer = routingTable.getPeer(hexId);
+        if (peer != null)
+            return peer;
+        return leafSet.getPeer(hexId);
     }
 
     public Peer[] getTableRow(String hexId) {

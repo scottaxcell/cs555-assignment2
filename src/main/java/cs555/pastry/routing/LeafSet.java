@@ -61,4 +61,12 @@ public class LeafSet {
         stringBuilder.append("\n");
         Utils.out(stringBuilder);
     }
+
+    public Peer getPeer(String hexId) {
+        if (getLeftNeighborId().equals(hexId))
+            return getLeftNeighbor();
+        else if (getRightNeighborId().equals(hexId))
+            return getRightNeighbor();
+        return null;
+    }
 }

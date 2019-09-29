@@ -4,8 +4,9 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
-* ~~rename Ip interfaces to Address and serverAddress variables to address~~
+* discovery node debug message to get all leafsets and print current network state
 * file read/write on client and peer nodes
+* ~~rename Ip interfaces to Address and serverAddress variables to address~~
 * ~~take another look at storing tcp connections in order to prevent creation of tons of tcp receiver threads~~
 
 ### Discovery node
@@ -24,6 +25,7 @@ Implementing The Pastry Peer To Peer Network
 * remove-node: remove self from network after contacting discovery node
 * print-dht: print DHT
 * list-files: prints files in storage
+* give the poor fella a nickname!
 
 ### StoreData
 * store/retrive file:
