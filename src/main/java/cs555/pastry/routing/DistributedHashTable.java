@@ -125,4 +125,8 @@ public class DistributedHashTable {
             }
         }
     }
+
+    public List<Peer> getPeers() {
+        return routingTable.getPeers();
+    }
 }

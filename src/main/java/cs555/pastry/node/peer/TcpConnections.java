@@ -16,12 +16,6 @@ public class TcpConnections {
         this.peerNode = peerNode;
     }
 
-    public void addTcpConnection(TcpConnection tcpConnection) {
-        synchronized (connections) {
-            connections.put(Utils.getIpFromAddress(tcpConnection.getRemoteSocketAddress()), tcpConnection);
-        }
-    }
-
     public TcpConnection getTcpConnection(String address) {
         String ip = Utils.getIpFromAddress(address);
 

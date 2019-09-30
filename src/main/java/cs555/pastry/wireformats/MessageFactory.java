@@ -23,6 +23,8 @@ public class MessageFactory {
                 return new JoinResponse(data, socket);
             case Protocol.LEAF_SET_UPDATE:
                 return new LeafSetUpdate(data);
+            case Protocol.ROUTING_TABLE_UPDATE:
+                return new RoutingTableUpdate(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }

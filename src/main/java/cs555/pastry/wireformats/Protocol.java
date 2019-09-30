@@ -7,4 +7,5 @@ public class Protocol {
     public static final int LOOKUP = 303;
     public static final int JOIN_RESPONSE = 304;
     public static final int LEAF_SET_UPDATE = 305;
+    public static final int ROUTING_TABLE_UPDATE = 306;
 }

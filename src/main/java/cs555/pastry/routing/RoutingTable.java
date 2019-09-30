@@ -2,7 +2,9 @@ package cs555.pastry.routing;
 
 import cs555.pastry.util.Utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class RoutingTable {
     private final String hexId;
@@ -107,5 +109,17 @@ public class RoutingTable {
 
     public Peer[][] getTable() {
         return table;
+    }
+
+    public List<Peer> getPeers() {
+        List<Peer> peers = new ArrayList<>();
+        for (int row = 0; row < table.length; row++) {
+            for (int col = 0; col < table[row].length; col++) {
+                Peer peer = table[row][col];
+                if (peer != null)
+                    peers.add(peer);
+            }
+        }
+        return peers;
     }
 }

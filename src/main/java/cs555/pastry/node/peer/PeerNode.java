@@ -63,9 +63,18 @@ public class PeerNode implements Node {
             case Protocol.LEAF_SET_UPDATE:
                 handleLeafSetUpdate((LeafSetUpdate) message);
                 break;
+            case Protocol.ROUTING_TABLE_UPDATE:
+                handleRoutingTableUpdate((RoutingTableUpdate) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleRoutingTableUpdate(RoutingTableUpdate update) {
+        Utils.debug("recevied: " + update);
+        distributedHashTable.updateRoutingTable(update.getPeer());
+        distributedHashTable.printState();
     }
 
     private void handleLeafSetUpdate(LeafSetUpdate update) {
@@ -243,8 +252,13 @@ public class PeerNode implements Node {
                 otherTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
             }
 
-            // todo update routing table and send routing table update
             distributedHashTable.updateRoutingTable(response.getRoutingTable());
+
+            RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(me);
+            for (Peer peer : distributedHashTable.getPeers()) {
+                TcpConnection tcpConnection = tcpConnections.getTcpConnection(peer.getAddress());
+                tcpConnection.send(routingTableUpdate.getBytes());
+            }
         }
 
         // todo print diagnostics

@@ -1,0 +1,81 @@
+package cs555.pastry.wireformats;
+
+import cs555.pastry.routing.Peer;
+
+import java.io.*;
+
+public class RoutingTableUpdate implements Message {
+    private Peer peer;
+
+
+    public RoutingTableUpdate(Peer peer) {
+        this.peer = peer;
+    }
+
+    public RoutingTableUpdate(byte[] bytes) {
+        try {
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
+
+            deserialize(dataInputStream);
+
+            byteArrayInputStream.close();
+            dataInputStream.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deserialize(DataInputStream dataInputStream) {
+        int protocol = WireformatUtils.deserializeInt(dataInputStream);
+        String id = WireformatUtils.deserializeString(dataInputStream);
+        String address = WireformatUtils.deserializeString(dataInputStream);
+        peer = new Peer(id, address);
+    }
+
+    @Override
+    public int getProtocol() {
+        return Protocol.ROUTING_TABLE_UPDATE;
+    }
+
+    @Override
+    public byte[] getBytes() {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(byteArrayOutputStream));
+
+            serialize(dataOutputStream);
+
+            dataOutputStream.flush();
+
+            byte[] data = byteArrayOutputStream.toByteArray();
+
+            byteArrayOutputStream.close();
+            dataOutputStream.close();
+
+            return data;
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return new byte[0];
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "LeafSetUpdate{" +
+            "peer=" + peer +
+            '}';
+    }
+
+    protected void serialize(DataOutputStream dataOutputStream) {
+        WireformatUtils.serializeInt(dataOutputStream, getProtocol());
+        WireformatUtils.serializeString(dataOutputStream, peer.getId());
+        WireformatUtils.serializeString(dataOutputStream, peer.getAddress());
+    }
+
+    public Peer getPeer() {
+        return peer;
+    }
+}

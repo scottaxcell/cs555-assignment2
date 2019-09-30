@@ -1,3 +1,7 @@
 oklahoma-city
 helena
 montpelier
+raleigh
+sacramento
+harrisburg
+honolulu
