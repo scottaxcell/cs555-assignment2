@@ -232,10 +232,10 @@ public class PeerNode implements Node {
             Peer sourcePeer = new Peer(sourceId, response.getRemoteSocketAddress());
 
             TcpConnection sourceTcpConnection = getTcpConnection(response.getRemoteSocketAddress());
-
+            TcpConnection otherTcpConnection;
             boolean isSourceLowerThanMe = Utils.getHexIdDecimalDifference(getHexId(), sourceId) > 0;
             if (isSourceLowerThanMe) {
-                TcpConnection otherTcpConnection = getTcpConnection(leafSet.getRightNeighborAddress());
+                otherTcpConnection = getTcpConnection(leafSet.getRightNeighborAddress());
                 distributedHashTable.setLeftNeighbor(sourcePeer);
                 distributedHashTable.setRightNeighbor(new Peer(leafSet.getRightNeighborId(), leafSet.getRightNeighborAddress()));
 
@@ -243,7 +243,7 @@ public class PeerNode implements Node {
                 otherTcpConnection.send(new LeafSetUpdate(me, true).getBytes());
             }
             else {
-                TcpConnection otherTcpConnection = getTcpConnection(leafSet.getLeftNeighborAddress());
+                otherTcpConnection = getTcpConnection(leafSet.getLeftNeighborAddress());
                 distributedHashTable.setLeftNeighbor(leafSet.getLeftNeighbor());
                 distributedHashTable.setRightNeighbor(sourcePeer);
 
@@ -251,9 +251,13 @@ public class PeerNode implements Node {
                 otherTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
             }
 
+            // todo how are we supposed to init the routing table, is this right?
+            RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(me);
+            sourceTcpConnection.send(routingTableUpdate.getBytes());
+            otherTcpConnection.send(routingTableUpdate.getBytes());
+
             distributedHashTable.updateRoutingTable(response.getRoutingTable());
 
-            RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(me);
             for (Peer peer : distributedHashTable.getPeers()) {
                 TcpConnection tcpConnection = tcpConnections.getTcpConnection(peer.getAddress());
                 tcpConnection.send(routingTableUpdate.getBytes());

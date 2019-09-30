@@ -50,6 +50,15 @@ public class JoinRequest extends Lookup {
             int col = WireformatUtils.deserializeInt(dataInputStream);
             Peer peer = Peer.deserialize(dataInputStream);
             table[row][col] = peer;
+            // todo investigate npe
+//            DEBUG 23:00:22.681: sending: JoinComplete{peer=Peer{id='3535', address='/129.82.44.165:46708'}}
+//            Exception in thread "Thread-6" java.lang.NullPointerException
+//            at cs555.pastry.wireformats.JoinRequest.deserialize(JoinRequest.java:52)
+//            at cs555.pastry.wireformats.JoinRequest.<init>(JoinRequest.java:34)
+//            at cs555.pastry.wireformats.MessageFactory.getMessageFromData(MessageFactory.java:21)
+//            at cs555.pastry.transport.TcpReceiver.run(TcpReceiver.java:38)
+//            at java.lang.Thread.run(Thread.java:748)
+
         }
     }
 

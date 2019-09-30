@@ -4,7 +4,7 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
-* buffer register requests, send registration complete when node joins network
+* ~~buffer register requests, send registration complete when node joins network~~
 * strip all address before storing or sending over the wire
 * discovery node debug message to get all leafsets and print current network state
 * file read/write on client and peer nodes
