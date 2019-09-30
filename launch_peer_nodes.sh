@@ -8,8 +8,8 @@ START_PEER_NODE="cd $CURRENT_WORKING_DIR; java -cp $CLASSES_DIR cs555.pastry.nod
 for peer_node in $(cat peer_nodes.txt)
 do
   echo 'logging into '$peer_node
-  COMMAND="xterm -e 'ssh -t $peer_node \"$START_PEER_NODE\"'"
-  echo $COMMAND
+  COMMAND="xterm -geometry 200x48 -e 'ssh -t $peer_node \"$START_PEER_NODE\"'"
+  #echo $COMMAND
   eval $COMMAND &
 done
 

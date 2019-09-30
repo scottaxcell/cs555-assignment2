@@ -25,6 +25,8 @@ public class MessageFactory {
                 return new LeafSetUpdate(data);
             case Protocol.ROUTING_TABLE_UPDATE:
                 return new RoutingTableUpdate(data);
+            case Protocol.JOIN_COMPLETE:
+                return new JoinComplete(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }

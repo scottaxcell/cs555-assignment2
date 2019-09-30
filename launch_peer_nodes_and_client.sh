@@ -1,2 +1,2 @@
-./chunk_servers.sh
-./client.sh
+./launch_peer_nodes.sh
+./launch_client.sh

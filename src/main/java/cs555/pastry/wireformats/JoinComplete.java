@@ -4,14 +4,14 @@ import cs555.pastry.routing.Peer;
 
 import java.io.*;
 
-public class RoutingTableUpdate implements Message {
+public class JoinComplete implements Message {
     private Peer peer;
 
-    public RoutingTableUpdate(Peer peer) {
+    public JoinComplete(Peer peer) {
         this.peer = peer;
     }
 
-    public RoutingTableUpdate(byte[] bytes) {
+    public JoinComplete(byte[] bytes) {
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
@@ -35,7 +35,7 @@ public class RoutingTableUpdate implements Message {
 
     @Override
     public int getProtocol() {
-        return Protocol.ROUTING_TABLE_UPDATE;
+        return Protocol.JOIN_COMPLETE;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class RoutingTableUpdate implements Message {
 
     @Override
     public String toString() {
-        return "RoutingTableUpdate{" +
+        return "JoinComplete{" +
             "peer=" + peer +
             '}';
     }

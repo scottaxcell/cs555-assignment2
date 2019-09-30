@@ -156,6 +156,8 @@ public class PeerNode implements Node {
     private void handleJoinResponse(JoinResponse response) {
         Utils.debug("received: " + response);
 
+        Peer me = new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress());
+
         LeafSet leafSet = response.getLeafSet();
 
         if (leafSet.getLeftNeighborId().isEmpty() && leafSet.getRightNeighborId().isEmpty()) {
@@ -167,7 +169,6 @@ public class PeerNode implements Node {
 
             TcpConnection tcpConnection = tcpConnections.getTcpConnection(sourceAddress);
             if (tcpConnection != null) {
-                Peer me = new Peer(getHexId(), tcpConnection.getLocalSocketAddress());
                 tcpConnection.send(new LeafSetUpdate(me, true).getBytes());
                 tcpConnection.send(new LeafSetUpdate(me, false).getBytes());
             }
@@ -180,7 +181,6 @@ public class PeerNode implements Node {
             TcpConnection sourceTcpConnection = getTcpConnection(response.getRemoteSocketAddress());
             TcpConnection otherTcpConnection = getTcpConnection(leafSet.getLeftNeighborAddress());
 
-            Peer me = new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress());
             Peer otherPeer = new Peer(leafSet.getLeftNeighborId(), leafSet.getLeftNeighborAddress());
             Peer sourcePeer = new Peer(sourceId, response.getRemoteSocketAddress());
 
@@ -230,7 +230,6 @@ public class PeerNode implements Node {
         else {
             String sourceId = response.getLastHopPeerId();
             Peer sourcePeer = new Peer(sourceId, response.getRemoteSocketAddress());
-            Peer me = new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress());
 
             TcpConnection sourceTcpConnection = getTcpConnection(response.getRemoteSocketAddress());
 
@@ -263,6 +262,9 @@ public class PeerNode implements Node {
 
         // todo print diagnostics
         distributedHashTable.printState();
+
+        Utils.debug("sending: " + new JoinComplete(me));
+        discoveryNodeTcpConnection.send(new JoinComplete(me).getBytes());
     }
 
     private List<String> createUpdatedRoute(List<String> route) {
@@ -286,6 +288,8 @@ public class PeerNode implements Node {
                 TcpConnection tcpConnection = getTcpConnection(response.getRandomPeerAddress());
                 tcpConnection.send(joinRequest.getBytes());
             }
+            else
+                discoveryNodeTcpConnection.send(new JoinComplete(new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress())).getBytes());
         }
         else {
             RegisterRequest registerRequest = new RegisterRequest(Utils.generateHexIdFromTimestamp(), discoveryNodeTcpConnection.getLocalSocketAddress());
