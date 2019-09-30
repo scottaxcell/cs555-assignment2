@@ -113,4 +113,16 @@ public class DistributedHashTable {
     public Peer[][] getRoutingTable() {
         return routingTable.getTable();
     }
+
+    public void updateRoutingTable(Peer[][] table) {
+        for (int row = 0; row < table.length; row++) {
+            if (table[row] == null)
+                continue;
+            for (int col = 0; col < table[row].length; col++) {
+                Peer peer = table[row][col];
+                if (peer != null)
+                    this.routingTable.update(peer);
+            }
+        }
+    }
 }

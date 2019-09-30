@@ -219,8 +219,32 @@ public class PeerNode implements Node {
             }
         }
         else {
-            // todo update and send leafset update
+            String sourceId = response.getLastHopPeerId();
+            Peer sourcePeer = new Peer(sourceId, response.getRemoteSocketAddress());
+            Peer me = new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress());
+
+            TcpConnection sourceTcpConnection = getTcpConnection(response.getRemoteSocketAddress());
+
+            boolean isSourceLowerThanMe = Utils.getHexIdDecimalDifference(getHexId(), sourceId) > 0;
+            if (isSourceLowerThanMe) {
+                TcpConnection otherTcpConnection = getTcpConnection(leafSet.getRightNeighborAddress());
+                distributedHashTable.setLeftNeighbor(sourcePeer);
+                distributedHashTable.setRightNeighbor(new Peer(leafSet.getRightNeighborId(), leafSet.getRightNeighborAddress()));
+
+                sourceTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
+                otherTcpConnection.send(new LeafSetUpdate(me, true).getBytes());
+            }
+            else {
+                TcpConnection otherTcpConnection = getTcpConnection(leafSet.getLeftNeighborAddress());
+                distributedHashTable.setLeftNeighbor(leafSet.getLeftNeighbor());
+                distributedHashTable.setRightNeighbor(sourcePeer);
+
+                sourceTcpConnection.send(new LeafSetUpdate(me, true).getBytes());
+                otherTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
+            }
+
             // todo update routing table and send routing table update
+            distributedHashTable.updateRoutingTable(response.getRoutingTable());
         }
 
         // todo print diagnostics

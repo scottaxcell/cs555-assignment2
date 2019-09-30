@@ -51,9 +51,9 @@ public class RoutingTable {
         if (oldPeer == null)
             table[p][i] = peer;
         else {
-            int origHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(hexId, oldPeer.getId());
-            int myHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(hexId, peerId);
-            if (origHexIdDecimalDifference > myHexIdDecimalDifference)
+            int oldHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(hexId, oldPeer.getId());
+            int newHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(hexId, peerId);
+            if (oldHexIdDecimalDifference > newHexIdDecimalDifference)
                 table[p][i] = peer;
         }
     }
