@@ -140,4 +140,11 @@ public class DistributedHashTable {
             routingTable.update(new Peer(hopId, hopIp));
         }
     }
+
+    public void updateRoutingTable(List<Peer> peers) {
+        for (Peer peer : peers) {
+            if (!hexId.equals(peer.getId()))
+                routingTable.update(peer);
+        }
+    }
 }

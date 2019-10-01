@@ -85,7 +85,7 @@ public class PeerNode implements Node {
 
     private void handleRoutingTableUpdate(RoutingTableUpdate update) {
         Utils.debug("recevied: " + update);
-        distributedHashTable.updateRoutingTable(update.getPeer());
+        distributedHashTable.updateRoutingTable(update.getPeers());
         distributedHashTable.printState();
     }
 
@@ -121,6 +121,7 @@ public class PeerNode implements Node {
 
         if (route.contains(createMyHopString())) {
             Utils.error("i've seen this message before!");
+            new Exception().printStackTrace();
             return;
         }
 
@@ -273,10 +274,9 @@ public class PeerNode implements Node {
 
             distributedHashTable.updateRoutingTableFromRoute(response.getRoute());
 
-            // todo how are we supposed to init the routing table, is this right?
-            RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(me);
-//            sourceTcpConnection.send(routingTableUpdate.getBytes());
-//            otherTcpConnection.send(routingTableUpdate.getBytes());
+            RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(distributedHashTable.getPeers());
+            sourceTcpConnection.send(routingTableUpdate.getBytes());
+            otherTcpConnection.send(routingTableUpdate.getBytes());
 
             for (Peer peer : distributedHashTable.getPeers()) {
                 TcpConnection tcpConnection = tcpConnections.getTcpConnection(peer.getAddress());

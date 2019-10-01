@@ -4,8 +4,11 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
-* ~~add the peer that is traversed in the join request flow to the routing table~~
+* flesh out routing table row updates on join request
+* don't add a peer to the routing table if it is already in the leafset
 * file read/write on client and peer nodes
+* refactor messages to use Peers where applicable
+* ~~add the peer that is traversed in the join request flow to the routing table~~
 * ~~discovery node debug message to get all leafsets and print current network state~~
 * ~~buffer register requests, send registration complete when node joins network~~
 * ~~strip all address before storing or sending over the wire~~

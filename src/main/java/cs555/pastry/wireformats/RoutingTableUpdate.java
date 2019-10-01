@@ -3,12 +3,14 @@ package cs555.pastry.wireformats;
 import cs555.pastry.routing.Peer;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RoutingTableUpdate implements Message {
-    private Peer peer;
+    private List<Peer> peers = new ArrayList<>();
 
-    public RoutingTableUpdate(Peer peer) {
-        this.peer = peer;
+    public RoutingTableUpdate(List<Peer> peers) {
+        this.peers = peers;
     }
 
     public RoutingTableUpdate(byte[] bytes) {
@@ -28,9 +30,10 @@ public class RoutingTableUpdate implements Message {
 
     public void deserialize(DataInputStream dataInputStream) {
         int protocol = WireformatUtils.deserializeInt(dataInputStream);
-        String id = WireformatUtils.deserializeString(dataInputStream);
-        String address = WireformatUtils.deserializeString(dataInputStream);
-        peer = new Peer(id, address);
+
+        int numPeers = WireformatUtils.deserializeInt(dataInputStream);
+        for (int i = 0; i < numPeers; i++)
+            peers.add(Peer.deserialize(dataInputStream));
     }
 
     @Override
@@ -64,17 +67,19 @@ public class RoutingTableUpdate implements Message {
     @Override
     public String toString() {
         return "RoutingTableUpdate{" +
-            "peer=" + peer +
+            "peers=" + peers +
             '}';
     }
 
     protected void serialize(DataOutputStream dataOutputStream) {
         WireformatUtils.serializeInt(dataOutputStream, getProtocol());
-        WireformatUtils.serializeString(dataOutputStream, peer.getId());
-        WireformatUtils.serializeString(dataOutputStream, peer.getAddress());
+
+        WireformatUtils.serializeInt(dataOutputStream, peers.size());
+        for (Peer peer : peers)
+            peer.serialize(dataOutputStream);
     }
 
-    public Peer getPeer() {
-        return peer;
+    public List<Peer> getPeers() {
+        return peers;
     }
 }
