@@ -1,5 +1,6 @@
 package cs555.pastry.routing;
 
+import cs555.pastry.node.peer.PeerNode;
 import cs555.pastry.util.Utils;
 
 import java.util.ArrayList;
@@ -128,5 +129,15 @@ public class DistributedHashTable {
 
     public List<Peer> getPeers() {
         return routingTable.getPeers();
+    }
+
+    public void updateRoutingTableFromRoute(List<String> route) {
+        for (String hop : route) {
+            String hopId = PeerNode.getHopId(hop);
+            if (hexId.equals(hopId))
+                continue;
+            String hopIp = PeerNode.getHopIp(hop);
+            routingTable.update(new Peer(hopId, hopIp));
+        }
     }
 }

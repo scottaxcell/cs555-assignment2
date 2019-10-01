@@ -269,12 +269,14 @@ public class PeerNode implements Node {
                 otherTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
             }
 
+            distributedHashTable.updateRoutingTable(response.getRoutingTable());
+
+            distributedHashTable.updateRoutingTableFromRoute(response.getRoute());
+
             // todo how are we supposed to init the routing table, is this right?
             RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(me);
 //            sourceTcpConnection.send(routingTableUpdate.getBytes());
 //            otherTcpConnection.send(routingTableUpdate.getBytes());
-
-            distributedHashTable.updateRoutingTable(response.getRoutingTable());
 
             for (Peer peer : distributedHashTable.getPeers()) {
                 TcpConnection tcpConnection = tcpConnections.getTcpConnection(peer.getAddress());
@@ -299,11 +301,11 @@ public class PeerNode implements Node {
         return String.format("%s:%s", getHexId(), getIp());
     }
 
-    private String getHopIp(String hop) {
+    public static String getHopIp(String hop) {
         return hop.split(":")[1];
     }
 
-    private String getHopId(String hop) {
+    public static String getHopId(String hop) {
         return hop.split(":")[0];
     }
 
