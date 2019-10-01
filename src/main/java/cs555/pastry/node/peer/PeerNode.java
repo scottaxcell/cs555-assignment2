@@ -8,6 +8,8 @@ import cs555.pastry.transport.TcpConnection;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;
 import cs555.pastry.wireformats.*;
+import cs555.pastry.wireformats.debug.LeafSetRequest;
+import cs555.pastry.wireformats.debug.LeafSetResponse;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -48,7 +50,7 @@ public class PeerNode implements Node {
     }
 
     @Override
-    public void onMessage(Message message) {
+    public synchronized void onMessage(Message message) {
         int protocol = message.getProtocol();
         switch (protocol) {
             case Protocol.REGISTER_RESPONSE:
@@ -66,9 +68,19 @@ public class PeerNode implements Node {
             case Protocol.ROUTING_TABLE_UPDATE:
                 handleRoutingTableUpdate((RoutingTableUpdate) message);
                 break;
+            case Protocol.LEAF_SET_REQUEST:
+                handleLeafSetRequset((LeafSetRequest) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleLeafSetRequset(LeafSetRequest request) {
+        Utils.debug("recevied: " + request);
+        LeafSetResponse response = new LeafSetResponse(new Peer(getHexId(), getIp()), distributedHashTable.getLeafSet());
+        Utils.debug("sending: " + response);
+        discoveryNodeTcpConnection.send(response.getBytes());
     }
 
     private void handleRoutingTableUpdate(RoutingTableUpdate update) {
@@ -121,9 +133,15 @@ public class PeerNode implements Node {
         }
 
         if (!getHexId().equals(lookup)) {
-            Peer[] nextTableRow = distributedHashTable.getTableRow(destinationHexId);
-            int tableRowIndex = route.size() - 1;
-            routingTable[tableRowIndex] = nextTableRow;
+            // todo fix index out of bounds exception
+//            Peer[] nextTableRow = distributedHashTable.getTableRow(destinationHexId);
+//            int tableRowIndex = route.size() - 1;
+//            routingTable[tableRowIndex] = nextTableRow;
+//            Exception in thread "Thread-12" java.lang.ArrayIndexOutOfBoundsException: 4
+//            at cs555.pastry.node.peer.PeerNode.handleJoinRequest(PeerNode.java:138)
+//            at cs555.pastry.node.peer.PeerNode.onMessage(PeerNode.java:60)
+//            at cs555.pastry.transport.TcpReceiver.run(TcpReceiver.java:39)
+//            at java.lang.Thread.run(Thread.java:748)
 
             JoinRequest joinRequest = new JoinRequest(request.getSourceAddress(), destinationHexId, createUpdatedRoute(route), routingTable);
             Peer peer = distributedHashTable.getPeer(lookup);

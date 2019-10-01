@@ -25,6 +25,7 @@ public class Client implements Node {
 
         handleCmdLineInput();
     }
+
     private void handleCmdLineInput() {
 //        printMenu();
 

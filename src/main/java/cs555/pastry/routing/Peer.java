@@ -4,6 +4,7 @@ import cs555.pastry.wireformats.WireformatUtils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.Objects;
 
 public class Peer {
     private final String id;
@@ -20,6 +21,20 @@ public class Peer {
 
     public String getAddress() {
         return address;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Peer peer = (Peer) o;
+        return id.equals(peer.id) &&
+            address.equals(peer.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, address);
     }
 
     @Override

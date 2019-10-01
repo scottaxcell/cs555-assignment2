@@ -41,4 +41,12 @@ public class Peers {
             return peers.add(peer);
         }
     }
+
+    public List<Peer> getPeers() {
+        List<Peer> peers = new ArrayList<>();
+        synchronized (this.peers) {
+            peers.addAll(this.peers);
+        }
+        return peers;
+    }
 }

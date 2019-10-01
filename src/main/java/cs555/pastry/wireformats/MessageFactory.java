@@ -1,5 +1,8 @@
 package cs555.pastry.wireformats;
 
+import cs555.pastry.wireformats.debug.LeafSetRequest;
+import cs555.pastry.wireformats.debug.LeafSetResponse;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -27,6 +30,10 @@ public class MessageFactory {
                 return new RoutingTableUpdate(data);
             case Protocol.JOIN_COMPLETE:
                 return new JoinComplete(data);
+            case Protocol.LEAF_SET_REQUEST:
+                return new LeafSetRequest(data);
+            case Protocol.LEAF_SET_RESPONSE:
+                return new LeafSetResponse(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }

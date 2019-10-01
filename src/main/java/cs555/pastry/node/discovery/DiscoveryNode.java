@@ -6,10 +6,13 @@ import cs555.pastry.transport.TcpSender;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;
 import cs555.pastry.wireformats.*;
+import cs555.pastry.wireformats.debug.LeafSetResponse;
 
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class DiscoveryNode implements Node {
     private final TcpServer tcpServer;
@@ -17,6 +20,7 @@ public class DiscoveryNode implements Node {
     private final List<RegisterRequest> registerRequests = new ArrayList<>();
     private boolean isRegisterRequestInProgress;
     private String registeringPeerIp;
+    private final NetworkPrinter networkPrinter = new NetworkPrinter();
 
     private DiscoveryNode(int port) {
         tcpServer = new TcpServer(port, this);
@@ -32,9 +36,17 @@ public class DiscoveryNode implements Node {
             case Protocol.JOIN_COMPLETE:
                 handleJoinComplete((JoinComplete) message);
                 break;
+            case Protocol.LEAF_SET_RESPONSE:
+                handleLeafSetResponse((LeafSetResponse) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleLeafSetResponse(LeafSetResponse response) {
+        Utils.debug("received: " + response);
+        networkPrinter.handleLeafSetResponse(response);
     }
 
     private void handleJoinComplete(JoinComplete message) {
@@ -89,6 +101,35 @@ public class DiscoveryNode implements Node {
     private void run() {
         new Thread(tcpServer).start();
         Utils.sleep(500);
+
+        handleCmdLineInput();
+    }
+
+    private void handleCmdLineInput() {
+//        printMenu();
+
+        String input;
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter(Pattern.compile("[\\r\\n;]+"));
+
+        while (true) {
+            Utils.out("\n");
+
+            input = scanner.next();
+            if (input.startsWith("e")) {
+                Utils.info("Auf Wiedersehen");
+                System.exit(0);
+            }
+            else if (input.startsWith("pn")) {
+                printNetwork();
+            }
+        }
+    }
+
+    private void printNetwork() {
+        // todo set receiving leafsets
+        // todo send leafset request to all registered peers
+        networkPrinter.print(peers.getPeers());
     }
 
     private static void printHelpAndExit() {

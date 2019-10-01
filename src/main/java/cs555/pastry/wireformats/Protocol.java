@@ -9,4 +9,6 @@ public class Protocol {
     public static final int LEAF_SET_UPDATE = 305;
     public static final int ROUTING_TABLE_UPDATE = 306;
     public static final int JOIN_COMPLETE = 307;
+    public static final int LEAF_SET_REQUEST = 308;
+    public static final int LEAF_SET_RESPONSE = 309;
 }
