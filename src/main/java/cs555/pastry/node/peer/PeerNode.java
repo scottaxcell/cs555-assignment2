@@ -107,7 +107,7 @@ public class PeerNode implements Node {
         List<String> route = request.getRoute();
         Peer[][] routingTable = request.getRoutingTable();
 
-        if (route.contains(getHexId())) {
+        if (route.contains(createMyHopString())) {
             Utils.error("i've seen this message before!");
             return;
         }
@@ -144,7 +144,7 @@ public class PeerNode implements Node {
     }
 
     private void sendJoinResponse(JoinRequest request) {
-        JoinResponse joinResponse = new JoinResponse(request.getSourceAddress(), request.getInitPeerId(), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
+        JoinResponse joinResponse = new JoinResponse(request.getSourceAddress(), getHopId(request.getInitHop()), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
         TcpConnection tcpConnection = getTcpConnection(request.getSourceAddress());
         if (tcpConnection != null) {
             Utils.debug("sending: " + joinResponse);
@@ -156,14 +156,14 @@ public class PeerNode implements Node {
     private void handleJoinResponse(JoinResponse response) {
         Utils.debug("received: " + response);
 
-        Peer me = new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress());
+        Peer me = new Peer(getHexId(), getIp());
 
         LeafSet leafSet = response.getLeafSet();
 
         if (leafSet.getLeftNeighborId().isEmpty() && leafSet.getRightNeighborId().isEmpty()) {
             // we are the second node to enter the network
             String sourceAddress = Utils.getIpFromAddress(response.getRemoteSocketAddress());
-            Peer peer = new Peer(response.getLastHopPeerId(), sourceAddress);
+            Peer peer = new Peer(getHopId(response.getLastHop()), sourceAddress);
             distributedHashTable.setLeftNeighbor(peer);
             distributedHashTable.setRightNeighbor(peer);
 
@@ -175,7 +175,7 @@ public class PeerNode implements Node {
         }
         else if (leafSet.getLeftNeighborId().equals(leafSet.getRightNeighborId())) {
             // we are the third node to enter the network
-            String sourceId = response.getLastHopPeerId();
+            String sourceId = getHopId(response.getLastHop());
             String otherId = leafSet.getLeftNeighborId();
 
             TcpConnection sourceTcpConnection = getTcpConnection(response.getRemoteSocketAddress());
@@ -228,7 +228,7 @@ public class PeerNode implements Node {
             }
         }
         else {
-            String sourceId = response.getLastHopPeerId();
+            String sourceId = getHopId(response.getLastHop());
             Peer sourcePeer = new Peer(sourceId, response.getRemoteSocketAddress());
 
             TcpConnection sourceTcpConnection = getTcpConnection(response.getRemoteSocketAddress());
@@ -253,8 +253,8 @@ public class PeerNode implements Node {
 
             // todo how are we supposed to init the routing table, is this right?
             RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(me);
-            sourceTcpConnection.send(routingTableUpdate.getBytes());
-            otherTcpConnection.send(routingTableUpdate.getBytes());
+//            sourceTcpConnection.send(routingTableUpdate.getBytes());
+//            otherTcpConnection.send(routingTableUpdate.getBytes());
 
             distributedHashTable.updateRoutingTable(response.getRoutingTable());
 
@@ -273,8 +273,20 @@ public class PeerNode implements Node {
 
     private List<String> createUpdatedRoute(List<String> route) {
         List<String> r = new ArrayList<>(route);
-        r.add(getHexId());
+        r.add(createMyHopString());
         return r;
+    }
+
+    private String createMyHopString() {
+        return String.format("%s:%s", getHexId(), getIp());
+    }
+
+    private String getHopIp(String hop) {
+        return hop.split(":")[1];
+    }
+
+    private String getHopId(String hop) {
+        return hop.split(":")[0];
     }
 
     private void handleRegisterResponse(RegisterResponse response) {
@@ -288,15 +300,16 @@ public class PeerNode implements Node {
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
             if (!randomPeerId.isEmpty()) {
-                JoinRequest joinRequest = new JoinRequest(discoveryNodeTcpConnection.getLocalSocketAddress(), getHexId(), Collections.singletonList(getHexId()), distributedHashTable.getRoutingTable());
+                JoinRequest joinRequest = new JoinRequest(getIp(), getHexId(), Collections.singletonList(createMyHopString()), distributedHashTable.getRoutingTable());
+                Utils.debug("sending: " + joinRequest);
                 TcpConnection tcpConnection = getTcpConnection(response.getRandomPeerAddress());
                 tcpConnection.send(joinRequest.getBytes());
             }
             else
-                discoveryNodeTcpConnection.send(new JoinComplete(new Peer(getHexId(), discoveryNodeTcpConnection.getLocalSocketAddress())).getBytes());
+                discoveryNodeTcpConnection.send(new JoinComplete(new Peer(getHexId(), getIp())).getBytes());
         }
         else {
-            RegisterRequest registerRequest = new RegisterRequest(Utils.generateHexIdFromTimestamp(), discoveryNodeTcpConnection.getLocalSocketAddress());
+            RegisterRequest registerRequest = new RegisterRequest(Utils.generateHexIdFromTimestamp(), getIp());
             discoveryNodeTcpConnection.send(registerRequest.getBytes());
         }
     }
@@ -332,5 +345,9 @@ public class PeerNode implements Node {
 
     public int getPort() {
         return port;
+    }
+
+    public String getIp() {
+        return Utils.getIpFromAddress(discoveryNodeTcpConnection.getLocalSocketAddress());
     }
 }

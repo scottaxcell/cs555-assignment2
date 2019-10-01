@@ -10,7 +10,6 @@ import java.util.List;
 public class JoinRequest extends Lookup {
     private Peer[][] table = new Peer[Utils.NUM_16_BIT_ID_DIGITS][];
 
-
     public JoinRequest() {
     }
 
@@ -49,6 +48,7 @@ public class JoinRequest extends Lookup {
             int row = WireformatUtils.deserializeInt(dataInputStream);
             int col = WireformatUtils.deserializeInt(dataInputStream);
             Peer peer = Peer.deserialize(dataInputStream);
+            Utils.debug("row, col: " + row + ", " + col);
             table[row][col] = peer;
             // todo investigate npe
 //            DEBUG 23:00:22.681: sending: JoinComplete{peer=Peer{id='3535', address='/129.82.44.165:46708'}}
@@ -124,9 +124,9 @@ public class JoinRequest extends Lookup {
     }
 
     /**
-     * id for the peer that originated this join request
+     * the peer that originated this join request
      */
-    public String getInitPeerId() {
+    public String getInitHop() {
         return getRoute().get(0);
     }
 

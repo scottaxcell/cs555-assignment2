@@ -101,7 +101,7 @@ public class Lookup implements Message {
         return destinationHexId;
     }
 
-    public String getLastHopPeerId() {
+    public String getLastHop() {
         if (route.size() > 0)
             return route.get(route.size() - 1);
         return "";
