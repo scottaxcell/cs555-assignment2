@@ -5,15 +5,14 @@ import cs555.pastry.routing.Peer;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.List;
 
 public class JoinResponse extends JoinRequest {
     private Socket socket;
     private LeafSet leafSet = new LeafSet();
 
-    public JoinResponse(String sourceAddress, String destinationHexId, List<String> route, LeafSet leafSet, Peer[][] routingTable) {
-        super(Protocol.JOIN_RESPONSE, sourceAddress, destinationHexId, route, routingTable);
+    public JoinResponse(String sourceAddress, String destinationHexId, List<String> route, LeafSet leafSet, List<Peer> routingTablePeers) {
+        super(Protocol.JOIN_RESPONSE, sourceAddress, destinationHexId, route, routingTablePeers);
         this.leafSet = leafSet;
     }
 
@@ -95,7 +94,7 @@ public class JoinResponse extends JoinRequest {
             ", sourceAddress='" + getSourceAddress() + '\'' +
             ", destinationHexId='" + getDestinationHexId() + '\'' +
             ", route=" + getRoute() +
-            ", table=" + Arrays.toString(getRoutingTable()) +
+            ", routingTablePeers=" + getRoutingTablePeers() +
             ", leafSet=" + leafSet +
             '}';
     }

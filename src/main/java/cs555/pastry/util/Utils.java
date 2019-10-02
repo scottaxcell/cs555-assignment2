@@ -28,7 +28,7 @@ public class Utils {
 
     public static void debug(Object o) {
         if (debug)
-            System.out.println(String.format("DEBUG %s %s", SIMPLE_DATE_FORMAT.format(new Date()), o));
+            System.out.println(String.format("\nDEBUG %s %s", SIMPLE_DATE_FORMAT.format(new Date()), o));
     }
 
     public static void error(Object o) {

@@ -52,27 +52,6 @@ public class DistributedHashTable {
             return peers.get(0);
         }
     }
-//        // if L0 == D, return L0
-//        if (leafSet.getLeftNeighborId().equals(destHexId))
-//            return leafSet.getLeftNeighborId();
-//
-//        // if L1 == D, return L1
-//        if (leafSet.getRightNeighborId().equals(destHexId))
-//            return leafSet.getRightNeighborId();
-//
-//        String nextPeerId = routingTable.lookup(destHexId);
-//        if (!nextPeerId.isEmpty())
-//            return nextPeerId;
-//        else {
-//            // return closest neighbor in leaf set
-//            int leftNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getLeftNeighborId());
-//            int rightNeighborHexIdDecimalDifference = Utils.getAbsoluteHexIdDecimalDifference(destHexId, leafSet.getRightNeighborId());
-//            if (leftNeighborHexIdDecimalDifference < rightNeighborHexIdDecimalDifference)
-//                return leafSet.getRightNeighborId();
-//            else
-//                return leafSet.getLeftNeighborId();
-//        }
-//        }
 
     public void updateRoutingTable(Peer peer) {
         routingTable.update(peer);
@@ -103,28 +82,16 @@ public class DistributedHashTable {
         return leafSet.getPeer(hexId);
     }
 
-    public Peer[] getTableRow(String hexId) {
-        return routingTable.getTableRow(hexId);
+    public List<Peer> getTableRow(String hexId) {
+        List<Peer> peers = new ArrayList<>();
+        for (Peer peer : routingTable.getTableRow(hexId))
+            if (peer != null)
+                peers.add(peer);
+        return peers;
     }
 
     public LeafSet getLeafSet() {
         return leafSet;
-    }
-
-    public Peer[][] getRoutingTable() {
-        return routingTable.getTable();
-    }
-
-    public void updateRoutingTable(Peer[][] table) {
-        for (int row = 0; row < table.length; row++) {
-            if (table[row] == null)
-                continue;
-            for (int col = 0; col < table[row].length; col++) {
-                Peer peer = table[row][col];
-                if (peer != null)
-                    this.routingTable.update(peer);
-            }
-        }
     }
 
     public List<Peer> getPeers() {

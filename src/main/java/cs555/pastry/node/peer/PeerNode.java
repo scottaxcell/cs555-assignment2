@@ -117,7 +117,7 @@ public class PeerNode implements Node {
 
         String destinationHexId = request.getDestinationHexId();
         List<String> route = request.getRoute();
-        Peer[][] routingTable = request.getRoutingTable();
+        List<Peer> routingTablePeers = request.getRoutingTablePeers();
 
         if (route.contains(createMyHopString())) {
             Utils.error("i've seen this message before!");
@@ -134,17 +134,13 @@ public class PeerNode implements Node {
         }
 
         if (!getHexId().equals(lookup)) {
-            // todo fix index out of bounds exception
-//            Peer[] nextTableRow = distributedHashTable.getTableRow(destinationHexId);
-//            int tableRowIndex = route.size() - 1;
-//            routingTable[tableRowIndex] = nextTableRow;
-//            Exception in thread "Thread-12" java.lang.ArrayIndexOutOfBoundsException: 4
-//            at cs555.pastry.node.peer.PeerNode.handleJoinRequest(PeerNode.java:138)
-//            at cs555.pastry.node.peer.PeerNode.onMessage(PeerNode.java:60)
-//            at cs555.pastry.transport.TcpReceiver.run(TcpReceiver.java:39)
-//            at java.lang.Thread.run(Thread.java:748)
+            List<Peer> tableRowPeers = distributedHashTable.getTableRow(destinationHexId);
+            for (Peer peer : tableRowPeers) {
+                if (!routingTablePeers.contains(peer))
+                    routingTablePeers.add(peer);
+            }
 
-            JoinRequest joinRequest = new JoinRequest(request.getSourceAddress(), destinationHexId, createUpdatedRoute(route), routingTable);
+            JoinRequest joinRequest = new JoinRequest(request.getSourceAddress(), destinationHexId, createUpdatedRoute(route), routingTablePeers);
             Peer peer = distributedHashTable.getPeer(lookup);
             if (peer == null) {
                 Utils.error("failed to get peer using hex id: " + lookup);
@@ -163,7 +159,7 @@ public class PeerNode implements Node {
     }
 
     private void sendJoinResponse(JoinRequest request) {
-        JoinResponse joinResponse = new JoinResponse(request.getSourceAddress(), getHopId(request.getInitHop()), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTable());
+        JoinResponse joinResponse = new JoinResponse(request.getSourceAddress(), getHopId(request.getInitHop()), createUpdatedRoute(request.getRoute()), distributedHashTable.getLeafSet(), request.getRoutingTablePeers());
         TcpConnection tcpConnection = getTcpConnection(request.getSourceAddress());
         if (tcpConnection != null) {
             Utils.debug("sending: " + joinResponse);
@@ -270,11 +266,12 @@ public class PeerNode implements Node {
                 otherTcpConnection.send(new LeafSetUpdate(me, false).getBytes());
             }
 
-            distributedHashTable.updateRoutingTable(response.getRoutingTable());
+            distributedHashTable.updateRoutingTable(response.getRoutingTablePeers());
 
             distributedHashTable.updateRoutingTableFromRoute(response.getRoute());
 
             RoutingTableUpdate routingTableUpdate = new RoutingTableUpdate(distributedHashTable.getPeers());
+
             sourceTcpConnection.send(routingTableUpdate.getBytes());
             otherTcpConnection.send(routingTableUpdate.getBytes());
 
@@ -320,7 +317,7 @@ public class PeerNode implements Node {
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
             if (!randomPeerId.isEmpty()) {
-                JoinRequest joinRequest = new JoinRequest(getIp(), getHexId(), Collections.singletonList(createMyHopString()), distributedHashTable.getRoutingTable());
+                JoinRequest joinRequest = new JoinRequest(getIp(), getHexId(), Collections.singletonList(createMyHopString()), Collections.emptyList());
                 Utils.debug("sending: " + joinRequest);
                 TcpConnection tcpConnection = getTcpConnection(response.getRandomPeerAddress());
                 tcpConnection.send(joinRequest.getBytes());

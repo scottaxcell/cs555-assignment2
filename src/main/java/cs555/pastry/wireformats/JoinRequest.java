@@ -1,26 +1,25 @@
 package cs555.pastry.wireformats;
 
 import cs555.pastry.routing.Peer;
-import cs555.pastry.util.Utils;
 
 import java.io.*;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JoinRequest extends Lookup {
-    private Peer[][] table = new Peer[Utils.NUM_16_BIT_ID_DIGITS][];
+    private List<Peer> routingTablePeers = new ArrayList<>();
 
     public JoinRequest() {
     }
 
-    public JoinRequest(String sourceAddress, String destinationHexId, List<String> route, Peer[][] routingTable) {
+    public JoinRequest(String sourceAddress, String destinationHexId, List<String> route, List<Peer> routingTablePeers) {
         super(Protocol.JOIN_REQUEST, sourceAddress, destinationHexId, route);
-        table = routingTable;
+        this.routingTablePeers = routingTablePeers;
     }
 
-    protected JoinRequest(int protocol, String sourceAddress, String destinationHexId, List<String> route, Peer[][] routingTable) {
+    protected JoinRequest(int protocol, String sourceAddress, String destinationHexId, List<String> route, List<Peer> routingTablePeers) {
         super(protocol, sourceAddress, destinationHexId, route);
-        table = routingTable;
+        this.routingTablePeers = routingTablePeers;
     }
 
     public JoinRequest(byte[] bytes) {
@@ -45,20 +44,7 @@ public class JoinRequest extends Lookup {
 
         int numPeers = WireformatUtils.deserializeInt(dataInputStream);
         for (int i = 0; i < numPeers; i++) {
-            int row = WireformatUtils.deserializeInt(dataInputStream);
-            int col = WireformatUtils.deserializeInt(dataInputStream);
-            Peer peer = Peer.deserialize(dataInputStream);
-            Utils.debug("row, col: " + row + ", " + col);
-            table[row][col] = peer;
-            // todo investigate npe
-//            DEBUG 23:00:22.681: sending: JoinComplete{peer=Peer{id='3535', address='/129.82.44.165:46708'}}
-//            Exception in thread "Thread-6" java.lang.NullPointerException
-//            at cs555.pastry.wireformats.JoinRequest.deserialize(JoinRequest.java:52)
-//            at cs555.pastry.wireformats.JoinRequest.<init>(JoinRequest.java:34)
-//            at cs555.pastry.wireformats.MessageFactory.getMessageFromData(MessageFactory.java:21)
-//            at cs555.pastry.transport.TcpReceiver.run(TcpReceiver.java:38)
-//            at java.lang.Thread.run(Thread.java:748)
-
+            routingTablePeers.add(Peer.deserialize(dataInputStream));
         }
     }
 
@@ -93,34 +79,13 @@ public class JoinRequest extends Lookup {
     protected void serialize(DataOutputStream dataOutputStream) {
         super.serialize(dataOutputStream);
 
-        int numPeers = 0;
-        for (int row = 0; row < table.length; row++) {
-            if (table[row] == null)
-                continue;
-            for (int col = 0; col < table[row].length; col++) {
-                Peer peer = table[row][col];
-                if (peer != null)
-                    numPeers++;
-            }
-        }
-        WireformatUtils.serializeInt(dataOutputStream, numPeers);
-
-        for (int row = 0; row < table.length; row++) {
-            if (table[row] == null)
-                continue;
-            for (int col = 0; col < table[row].length; col++) {
-                Peer peer = table[row][col];
-                if (peer != null) {
-                    WireformatUtils.serializeInt(dataOutputStream, row);
-                    WireformatUtils.serializeInt(dataOutputStream, col);
-                    peer.serialize(dataOutputStream);
-                }
-            }
-        }
+        WireformatUtils.serializeInt(dataOutputStream, routingTablePeers.size());
+        for (Peer peer : routingTablePeers)
+            peer.serialize(dataOutputStream);
     }
 
-    public Peer[][] getRoutingTable() {
-        return table;
+    public List<Peer> getRoutingTablePeers() {
+        return routingTablePeers;
     }
 
     /**
@@ -137,7 +102,7 @@ public class JoinRequest extends Lookup {
             ", sourceAddress='" + getSourceAddress() + '\'' +
             ", destinationHexId='" + getDestinationHexId() + '\'' +
             ", route=" + getRoute() +
-            ", table=" + Arrays.toString(table) +
+            ", routingTablePeers=" + routingTablePeers +
             '}';
     }
 }

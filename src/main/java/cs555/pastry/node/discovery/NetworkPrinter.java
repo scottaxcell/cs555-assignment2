@@ -37,9 +37,6 @@ public class NetworkPrinter {
             peerToLeafSet.put(peer, leafSet);
 
             if (pendingPeers.isEmpty()) {
-                Utils.debug("RECEIVED ALL LEAFSET RESPONSES");
-                // todo print network
-
                 synchronized (peerToLeafSet) {
                     Utils.info("Network Topology");
                     Utils.out("      ================\n");
@@ -47,9 +44,10 @@ public class NetworkPrinter {
                         .sorted((a, b) -> Utils.getHexIdDecimalDifference(a.getKey().getId(), b.getKey().getId()) > 0 ? 1 : Utils.getHexIdDecimalDifference(b.getKey().getId(), a.getKey().getId()) > 0 ? -1 : 0)
                         .forEach(e -> {
                             Utils.out(
-                                String.format("      %s <-- %s --> %s\n",
+                                String.format("      %s <-- %s %-15s --> %s\n",
                                     e.getValue().getLeftNeighborId(),
-                                    e.getKey().getId() + " (" + e.getKey().getAddress() + ")",
+                                    e.getKey().getId(),
+                                    "(" + e.getKey().getAddress() + ")",
                                     e.getValue().getRightNeighborId()
                                 ));
                         });
