@@ -67,6 +67,7 @@ public class DistributedHashTable {
 
     public void printState() {
         Utils.out("Hex ID: " + hexId + "\n");
+        Utils.out("============\n");
         leafSet.printState();
         routingTable.printState();
     }
@@ -113,5 +114,9 @@ public class DistributedHashTable {
             if (!hexId.equals(peer.getId()))
                 routingTable.update(peer);
         }
+    }
+
+    public void removePeer(Peer peer) {
+        routingTable.removePeer(peer);
     }
 }

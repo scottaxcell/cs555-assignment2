@@ -34,6 +34,8 @@ public class MessageFactory {
                 return new LeafSetRequest(data);
             case Protocol.LEAF_SET_RESPONSE:
                 return new LeafSetResponse(data);
+            case Protocol.FORGET_ME:
+                return new ForgetMe(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }

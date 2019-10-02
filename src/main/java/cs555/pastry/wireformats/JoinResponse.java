@@ -2,6 +2,7 @@ package cs555.pastry.wireformats;
 
 import cs555.pastry.routing.LeafSet;
 import cs555.pastry.routing.Peer;
+import cs555.pastry.util.Utils;
 
 import java.io.*;
 import java.net.Socket;
@@ -104,6 +105,6 @@ public class JoinResponse extends JoinRequest {
     }
 
     public String getRemoteSocketAddress() {
-        return getSocket().getRemoteSocketAddress().toString();
+        return Utils.getIpFromAddress(getSocket().getRemoteSocketAddress().toString());
     }
 }

@@ -40,9 +40,17 @@ public class DiscoveryNode implements Node {
             case Protocol.LEAF_SET_RESPONSE:
                 handleLeafSetResponse((LeafSetResponse) message);
                 break;
+            case Protocol.FORGET_ME:
+                handleForgetMe((ForgetMe) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleForgetMe(ForgetMe message) {
+        Utils.debug("received: " + message);
+        peers.removePeer(message.getPeer());
     }
 
     private void handleLeafSetResponse(LeafSetResponse response) {
@@ -153,11 +161,11 @@ public class DiscoveryNode implements Node {
     }
 
     private static void printMenu() {
-        Utils.out("\n******************************\n");
-        Utils.out("h    -- print this menu\n");
-        Utils.out("pnt  -- print network topology\n");
-        Utils.out("lan  -- list active nodes\n");
-        Utils.out("******************************\n");
+        Utils.out("\n*****************************\n");
+        Utils.out("h   -- print this menu\n");
+        Utils.out("pnt -- print network topology\n");
+        Utils.out("lan -- list active nodes\n");
+        Utils.out("*****************************\n");
     }
 
     private static void printHelpAndExit() {

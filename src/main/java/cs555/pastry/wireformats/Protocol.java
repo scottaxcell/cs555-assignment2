@@ -11,4 +11,5 @@ public class Protocol {
     public static final int JOIN_COMPLETE = 307;
     public static final int LEAF_SET_REQUEST = 308;
     public static final int LEAF_SET_RESPONSE = 309;
+    public static final int FORGET_ME = 310;
 }

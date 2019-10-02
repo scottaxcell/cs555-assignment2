@@ -49,4 +49,10 @@ public class Peers {
         }
         return peers;
     }
+
+    public void removePeer(Peer peer) {
+        synchronized (peers) {
+            peers.remove(peer);
+        }
+    }
 }

@@ -16,8 +16,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class PeerNode implements Node {
+    private static final int FORGET_ME_TTL = 25;
     private final int port;
     private final TcpServer tcpServer;
     private final TcpConnections tcpConnections;
@@ -47,6 +50,8 @@ public class PeerNode implements Node {
     private void run() {
         new Thread(tcpServer).start();
         Utils.sleep(500);
+
+        handleCmdLineInput();
     }
 
     @Override
@@ -71,9 +76,27 @@ public class PeerNode implements Node {
             case Protocol.LEAF_SET_REQUEST:
                 handleLeafSetRequset((LeafSetRequest) message);
                 break;
+            case Protocol.FORGET_ME:
+                handleForgetMe((ForgetMe) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleForgetMe(ForgetMe message) {
+        Utils.debug("recevied: " + message);
+        distributedHashTable.removePeer(message.getPeer());
+        distributedHashTable.printState();
+
+        int ttl = message.getTtl() - 1;
+        if (ttl <= 0)
+            return;
+
+        message.setTtl(ttl);
+
+        TcpConnection rightTcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getRightNeighborAddress());
+        rightTcpConnection.send(message.getBytes());
     }
 
     private void handleLeafSetRequset(LeafSetRequest request) {
@@ -177,7 +200,7 @@ public class PeerNode implements Node {
 
         if (leafSet.getLeftNeighborId().isEmpty() && leafSet.getRightNeighborId().isEmpty()) {
             // we are the second node to enter the network
-            String sourceAddress = Utils.getIpFromAddress(response.getRemoteSocketAddress());
+            String sourceAddress = response.getRemoteSocketAddress();
             Peer peer = new Peer(getHopId(response.getLastHop()), sourceAddress);
             distributedHashTable.setLeftNeighbor(peer);
             distributedHashTable.setRightNeighbor(peer);
@@ -366,5 +389,65 @@ public class PeerNode implements Node {
 
     public String getIp() {
         return Utils.getIpFromAddress(discoveryNodeTcpConnection.getLocalSocketAddress());
+    }
+
+    private void handleCmdLineInput() {
+        printMenu();
+
+        String input;
+        Scanner scanner = new Scanner(System.in);
+        scanner.useDelimiter(Pattern.compile("[\\r\\n;]+"));
+
+        while (true) {
+            Utils.out("\n");
+
+            input = scanner.next();
+            if (input.startsWith("e")) {
+                Utils.info("Auf Wiedersehen");
+                System.exit(0);
+            }
+            else if (input.startsWith("h")) {
+                printMenu();
+            }
+            else if (input.startsWith("rn")) {
+                removeNodeFromNetwork();
+            }
+            else if (input.startsWith("prt")) {
+                printRoutingTable();
+            }
+            else if (input.startsWith("lf")) {
+                printStoredFiles();
+            }
+        }
+    }
+
+    private void printStoredFiles() {
+        // todo
+    }
+
+    private void printRoutingTable() {
+        distributedHashTable.printState();
+    }
+
+    private void removeNodeFromNetwork() {
+        ForgetMe forgetMe = new ForgetMe(FORGET_ME_TTL, new Peer(getHexId(), getIp()));
+
+        discoveryNodeTcpConnection.send(forgetMe.getBytes());
+
+        TcpConnection leftTcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getLeftNeighborAddress());
+        leftTcpConnection.send(new LeafSetUpdate(distributedHashTable.getLeafSet().getRightNeighbor(), false).getBytes());
+
+        TcpConnection rightTcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getRightNeighborAddress());
+        rightTcpConnection.send(new LeafSetUpdate(distributedHashTable.getLeafSet().getLeftNeighbor(), true).getBytes());
+        rightTcpConnection.send(forgetMe.getBytes());
+    }
+
+    private static void printMenu() {
+        Utils.out("\n*************************************\n");
+        Utils.out("h   -- print this menu\n");
+        Utils.out("rn  -- remove node from network\n");
+        Utils.out("prt -- print routing table and leaf set\n");
+        Utils.out("lf  -- print stored files\n");
+        Utils.out("***************************************\n");
     }
 }

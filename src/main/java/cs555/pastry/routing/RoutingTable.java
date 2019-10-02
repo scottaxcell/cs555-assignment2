@@ -122,4 +122,14 @@ public class RoutingTable {
         }
         return peers;
     }
+
+    public void removePeer(Peer removeMe) {
+        for (int row = 0; row < table.length; row++) {
+            for (int col = 0; col < table[row].length; col++) {
+                Peer peer = table[row][col];
+                if (peer != null && peer.equals(removeMe))
+                    table[row][col] = null;
+            }
+        }
+    }
 }
