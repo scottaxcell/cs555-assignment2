@@ -20,10 +20,11 @@ public class DiscoveryNode implements Node {
     private final List<RegisterRequest> registerRequests = new ArrayList<>();
     private boolean isRegisterRequestInProgress;
     private String registeringPeerIp;
-    private final NetworkPrinter networkPrinter = new NetworkPrinter();
+    private final NetworkPrinter networkPrinter;
 
-    private DiscoveryNode(int port) {
+    private DiscoveryNode(int port, int peerPort) {
         tcpServer = new TcpServer(port, this);
+        networkPrinter = new NetworkPrinter(peerPort);
     }
 
     @Override
@@ -90,12 +91,13 @@ public class DiscoveryNode implements Node {
     }
 
     public static void main(String[] args) {
-        if (args.length != 1)
+        if (args.length != 2)
             printHelpAndExit();
 
         int port = Integer.parseInt(args[0]);
+        int peerPort = Integer.parseInt(args[1]);
 
-        new DiscoveryNode(port).run();
+        new DiscoveryNode(port, peerPort).run();
     }
 
     private void run() {
@@ -106,7 +108,7 @@ public class DiscoveryNode implements Node {
     }
 
     private void handleCmdLineInput() {
-//        printMenu();
+        printMenu();
 
         String input;
         Scanner scanner = new Scanner(System.in);
@@ -120,20 +122,46 @@ public class DiscoveryNode implements Node {
                 Utils.info("Auf Wiedersehen");
                 System.exit(0);
             }
-            else if (input.startsWith("pn")) {
-                printNetwork();
+            else if (input.startsWith("h")) {
+                printMenu();
+            }
+            else if (input.startsWith("pnt")) {
+                printNetworkTopology();
+            }
+            else if (input.startsWith("lan")) {
+                printActiveNodes();
             }
         }
     }
 
-    private void printNetwork() {
-        // todo set receiving leafsets
-        // todo send leafset request to all registered peers
+    private void printActiveNodes() {
+        Utils.info("Active Nodes");
+        Utils.out("      ============\n");
+        List<Peer> peers = this.peers.getPeers();
+        if (peers.isEmpty())
+            Utils.out("      No known active nodes\n");
+        else
+            peers.stream()
+            .sorted((p1, p2) -> Utils.getHexIdDecimalDifference(p1.getId(), p2.getId()) > 0 ? 1 : Utils.getHexIdDecimalDifference(p2.getId(), p1.getId()) > 0 ? -1 : 0)
+            .forEach(p -> {
+                Utils.out("      " + p.getId() + " @ " + p.getAddress() + "\n");
+            });
+    }
+
+    private void printNetworkTopology() {
         networkPrinter.print(peers.getPeers());
     }
 
+    private static void printMenu() {
+        Utils.out("\n******************************\n");
+        Utils.out("h    -- print this menu\n");
+        Utils.out("pnt  -- print network topology\n");
+        Utils.out("lan  -- list active nodes\n");
+        Utils.out("******************************\n");
+    }
+
     private static void printHelpAndExit() {
-        Utils.out("USAGE: java DiscoveryNode <port>\n");
+        Utils.out("USAGE: java DiscoveryNode <port> <peer-port>\n");
         System.exit(-1);
     }
 }

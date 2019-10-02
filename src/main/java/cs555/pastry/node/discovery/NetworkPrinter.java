@@ -13,16 +13,27 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkPrinter {
+    private final int peerPort;
     private final List<Peer> pendingPeers = new ArrayList<>();
     private final Map<Peer, LeafSet> peerToLeafSet = new ConcurrentHashMap<>();
 
+    public NetworkPrinter(int peerPort) {
+        this.peerPort = peerPort;
+    }
+
     public void print(List<Peer> peers) {
+        if (peers.isEmpty()) {
+            Utils.info("Network Topology");
+            Utils.out("      ================\n");
+            Utils.out("      No known active nodes\n");
+            return;
+        }
         synchronized (pendingPeers) {
             pendingPeers.clear();
             pendingPeers.addAll(peers);
 
             for (Peer peer : pendingPeers) {
-                TcpSender tcpSender = TcpSender.of(String.format("%s:%d", peer.getAddress(), 1328));
+                TcpSender tcpSender = TcpSender.of(String.format("%s:%d", peer.getAddress(), peerPort));
                 tcpSender.send(new LeafSetRequest().getBytes());
             }
         }
@@ -41,7 +52,7 @@ public class NetworkPrinter {
                     Utils.info("Network Topology");
                     Utils.out("      ================\n");
                     peerToLeafSet.entrySet().stream()
-                        .sorted((a, b) -> Utils.getHexIdDecimalDifference(a.getKey().getId(), b.getKey().getId()) > 0 ? 1 : Utils.getHexIdDecimalDifference(b.getKey().getId(), a.getKey().getId()) > 0 ? -1 : 0)
+                        .sorted((e1, e2) -> Utils.getHexIdDecimalDifference(e1.getKey().getId(), e2.getKey().getId()) > 0 ? 1 : Utils.getHexIdDecimalDifference(e2.getKey().getId(), e1.getKey().getId()) > 0 ? -1 : 0)
                         .forEach(e -> {
                             Utils.out(
                                 String.format("      %s <-- %s %-15s --> %s\n",
