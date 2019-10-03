@@ -28,9 +28,7 @@ public class JoinComplete implements Message {
 
     public void deserialize(DataInputStream dataInputStream) {
         int protocol = WireformatUtils.deserializeInt(dataInputStream);
-        String id = WireformatUtils.deserializeString(dataInputStream);
-        String address = WireformatUtils.deserializeString(dataInputStream);
-        peer = new Peer(id, address);
+        peer = Peer.deserialize(dataInputStream);
     }
 
     @Override
@@ -70,8 +68,7 @@ public class JoinComplete implements Message {
 
     protected void serialize(DataOutputStream dataOutputStream) {
         WireformatUtils.serializeInt(dataOutputStream, getProtocol());
-        WireformatUtils.serializeString(dataOutputStream, peer.getId());
-        WireformatUtils.serializeString(dataOutputStream, peer.getAddress());
+        peer.serialize(dataOutputStream);
     }
 
     public Peer getPeer() {

@@ -6,7 +6,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JoinRequest extends Lookup {
+public class JoinRequest extends LookupRequest {
     private List<Peer> routingTablePeers = new ArrayList<>();
 
     public JoinRequest() {
@@ -86,13 +86,6 @@ public class JoinRequest extends Lookup {
 
     public List<Peer> getRoutingTablePeers() {
         return routingTablePeers;
-    }
-
-    /**
-     * the peer that originated this join request
-     */
-    public String getInitHop() {
-        return getRoute().get(0);
     }
 
     @Override

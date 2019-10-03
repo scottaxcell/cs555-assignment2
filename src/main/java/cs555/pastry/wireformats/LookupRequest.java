@@ -4,27 +4,27 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lookup implements Message {
+public class LookupRequest implements Message {
     private int protocol;
     private String sourceAddress;
     private String destinationHexId;
     private List<String> route = new ArrayList<>(); // todo use List<Peer> instead
 
-    public Lookup() {
+    public LookupRequest() {
     }
 
-    public Lookup(String sourceAddress, String destinationHexId, List<String> route) {
-        this(Protocol.LOOKUP, sourceAddress, destinationHexId, route);
+    public LookupRequest(String sourceAddress, String destinationHexId, List<String> route) {
+        this(Protocol.LOOKUP_REQUEST, sourceAddress, destinationHexId, route);
     }
 
-    protected Lookup(int protocol, String sourceAddress, String destinationHexId, List<String> route) {
+    protected LookupRequest(int protocol, String sourceAddress, String destinationHexId, List<String> route) {
         this.protocol = protocol;
         this.sourceAddress = sourceAddress;
         this.destinationHexId = destinationHexId;
         this.route.addAll(route);
     }
 
-    public Lookup(byte[] bytes) {
+    public LookupRequest(byte[] bytes) {
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
@@ -81,8 +81,8 @@ public class Lookup implements Message {
         WireformatUtils.serializeString(dataOutputStream, sourceAddress);
         WireformatUtils.serializeString(dataOutputStream, destinationHexId);
         WireformatUtils.serializeInt(dataOutputStream, route.size());
-        for (String peerId : route)
-            WireformatUtils.serializeString(dataOutputStream, peerId);
+        for (String peer : route)
+            WireformatUtils.serializeString(dataOutputStream, peer);
     }
 
     public int getNumHops() {
@@ -107,9 +107,16 @@ public class Lookup implements Message {
         return "";
     }
 
+    /**
+     * the peer that originated this join request
+     */
+    public String getInitHop() {
+        return getRoute().get(0);
+    }
+
     @Override
     public String toString() {
-        return "Lookup{" +
+        return "LookupRequest{" +
             "protocol=" + protocol +
             ", sourceAddress='" + sourceAddress + '\'' +
             ", destinationHexId='" + destinationHexId + '\'' +

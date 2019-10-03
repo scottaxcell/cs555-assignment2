@@ -79,13 +79,49 @@ public class PeerNode implements Node {
             case Protocol.FORGET_ME:
                 handleForgetMe((ForgetMe) message);
                 break;
+            case Protocol.LOOKUP_REQUEST:
+                handleLookupRequest((LookupRequest) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
     }
 
+    private void handleLookupRequest(LookupRequest request) {
+        Utils.debug("received: " + request);
+
+        String destinationHexId = request.getDestinationHexId();
+        List<String> route = request.getRoute();
+
+        String lookup = distributedHashTable.lookup(destinationHexId);
+        if (!getHexId().equals(lookup)) {
+            LookupRequest lookupRequest = new LookupRequest(request.getSourceAddress(), destinationHexId, createUpdatedRoute(route));
+            Peer peer = distributedHashTable.getPeer(lookup);
+            if (peer == null) {
+                Utils.error("failed to get peer using hex id: " + lookup);
+                distributedHashTable.printState();
+                return;
+            }
+            TcpConnection tcpConnection = getTcpConnection(peer.getAddress());
+            if (tcpConnection != null) {
+                Utils.debug("sending: " + lookupRequest);
+                tcpConnection.send(lookupRequest.getBytes());
+                // todo print join request
+            }
+        }
+        else {
+            LookupResponse lookupResponse = new LookupResponse(request.getSourceAddress(), destinationHexId, createUpdatedRoute(request.getRoute()), new Peer(getHexId(), getIp()));
+            TcpConnection tcpConnection = getTcpConnection(request.getSourceAddress());
+            if (tcpConnection != null) {
+                Utils.debug("sending: " + lookupResponse);
+                tcpConnection.send(lookupResponse.getBytes());
+                // todo print join response
+            }
+        }
+    }
+
     private void handleForgetMe(ForgetMe message) {
-        Utils.debug("recevied: " + message);
+        Utils.debug("received: " + message);
         distributedHashTable.removePeer(message.getPeer());
         distributedHashTable.printState();
 
@@ -100,20 +136,20 @@ public class PeerNode implements Node {
     }
 
     private void handleLeafSetRequset(LeafSetRequest request) {
-        Utils.debug("recevied: " + request);
+        Utils.debug("received: " + request);
         LeafSetResponse response = new LeafSetResponse(new Peer(getHexId(), getIp()), distributedHashTable.getLeafSet());
         Utils.debug("sending: " + response);
         discoveryNodeTcpConnection.send(response.getBytes());
     }
 
     private void handleRoutingTableUpdate(RoutingTableUpdate update) {
-        Utils.debug("recevied: " + update);
+        Utils.debug("received: " + update);
         distributedHashTable.updateRoutingTable(update.getPeers());
         distributedHashTable.printState();
     }
 
     private void handleLeafSetUpdate(LeafSetUpdate update) {
-        Utils.debug("recevied: " + update);
+        Utils.debug("received: " + update);
 
         if (update.isLeftNeighbor())
             distributedHashTable.setLeftNeighbor(update.getPeer());
@@ -124,7 +160,7 @@ public class PeerNode implements Node {
     }
 
     private void handleJoinRequest(JoinRequest request) {
-        Utils.debug("recevied: " + request);
+        Utils.debug("received: " + request);
 
         if (distributedHashTable.getLeafSet().getLeftNeighborId().isEmpty() &&
             distributedHashTable.getLeafSet().getRightNeighborId().isEmpty()) {

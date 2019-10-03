@@ -36,6 +36,14 @@ public class MessageFactory {
                 return new LeafSetResponse(data);
             case Protocol.FORGET_ME:
                 return new ForgetMe(data);
+            case Protocol.RANDOM_PEER_REQUEST:
+                return new RandomPeerRequest(data, socket);
+            case Protocol.RANDOM_PEER_RESPONSE:
+                return new RandomPeerResponse(data);
+            case Protocol.LOOKUP_REQUEST:
+                return new LookupRequest(data);
+            case Protocol.LOOKUP_RESPONSE:
+                return new LookupResponse(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }

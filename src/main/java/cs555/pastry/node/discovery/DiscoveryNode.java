@@ -43,8 +43,23 @@ public class DiscoveryNode implements Node {
             case Protocol.FORGET_ME:
                 handleForgetMe((ForgetMe) message);
                 break;
+            case Protocol.RANDOM_PEER_REQUEST:
+                handleRandomPeerRequest((RandomPeerRequest) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
+        }
+    }
+
+    private void handleRandomPeerRequest(RandomPeerRequest request) {
+        Utils.debug("received: " + request);
+
+        Peer randomPeer = peers.getRandomPeer("");
+        if (randomPeer != null) {
+            RandomPeerResponse response = new RandomPeerResponse(randomPeer);
+            Utils.debug("sending: " + response);
+            TcpSender tcpSender = new TcpSender(request.getSocket());
+            tcpSender.send(response.getBytes());
         }
     }
 

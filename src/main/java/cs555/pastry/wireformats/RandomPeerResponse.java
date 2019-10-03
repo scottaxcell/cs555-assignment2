@@ -4,16 +4,14 @@ import cs555.pastry.routing.Peer;
 
 import java.io.*;
 
-public class LeafSetUpdate implements Message {
+public class RandomPeerResponse implements Message {
     private Peer peer;
-    private boolean isLeftNeighbor;
 
-    public LeafSetUpdate(Peer peer, boolean isLeftNeighbor) {
+    public RandomPeerResponse(Peer peer) {
         this.peer = peer;
-        this.isLeftNeighbor = isLeftNeighbor;
     }
 
-    public LeafSetUpdate(byte[] bytes) {
+    public RandomPeerResponse(byte[] bytes) {
         try {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(byteArrayInputStream));
@@ -31,12 +29,11 @@ public class LeafSetUpdate implements Message {
     public void deserialize(DataInputStream dataInputStream) {
         int protocol = WireformatUtils.deserializeInt(dataInputStream);
         peer = Peer.deserialize(dataInputStream);
-        isLeftNeighbor = WireformatUtils.deserializeBoolean(dataInputStream);
     }
 
     @Override
     public int getProtocol() {
-        return Protocol.LEAF_SET_UPDATE;
+        return Protocol.RANDOM_PEER_RESPONSE;
     }
 
     @Override
@@ -64,23 +61,17 @@ public class LeafSetUpdate implements Message {
 
     @Override
     public String toString() {
-        return "LeafSetUpdate{" +
+        return "RandomPeerResponse{" +
             "peer=" + peer +
-            ", isLeftNeighbor=" + isLeftNeighbor +
             '}';
     }
 
     protected void serialize(DataOutputStream dataOutputStream) {
         WireformatUtils.serializeInt(dataOutputStream, getProtocol());
         peer.serialize(dataOutputStream);
-        WireformatUtils.serializeBoolean(dataOutputStream, isLeftNeighbor);
     }
 
     public Peer getPeer() {
         return peer;
-    }
-
-    public boolean isLeftNeighbor() {
-        return isLeftNeighbor;
     }
 }

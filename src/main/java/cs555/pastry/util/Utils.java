@@ -40,6 +40,11 @@ public class Utils {
         return hexId.substring(hexId.length() - NUM_16_BIT_ID_DIGITS);
     }
 
+    public static String generateHexIdFromFileName(String fileName) {
+        String hexId = convertBytesToHex(fileName.getBytes());
+        return hexId.substring(hexId.length() - NUM_16_BIT_ID_DIGITS);
+    }
+
     public static String getLongestCommonPrefix(String hexId1, String hexId2) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < hexId1.length(); i++) {

@@ -39,7 +39,6 @@ public class RoutingTable {
             }
         }
 
-        Utils.debug("routing table exhausted -- unable to find next peer");
         return "";
     }
 

@@ -4,6 +4,9 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
+* store file request message
+* retrieve file request message
+* retrieve file response message
 * flesh out routing table row updates on join request
 * don't add a peer to the routing table if it is already in the leafset
 * file read/write on client and peer nodes
@@ -27,7 +30,7 @@ Implementing The Pastry Peer To Peer Network
 * print the following on joining: DHT, route
 * print DHT on update
 * print when storing a file or sends to another peer
-* print on lookup/join queries: type of message, dest/file id, hop count, next hop
+* print on lookupRequest/join queries: type of message, dest/file id, hop count, next hop
 * remove-node: remove self from network after contacting discovery node
 * print-dht: print DHT
 * list-files: prints files in storage
@@ -37,12 +40,13 @@ Implementing The Pastry Peer To Peer Network
 * store/retrive file:
     * print random node it connects to
     * print id of data
-    * print route of lookup message
+    * print route of lookupRequest message
     * print success/fail of file operation
 
 ## Notes
 * All peers are assumed to have the same port, this is vital.
-* store connected peer tcp connections using the registration id
+* A client and a peer cannot run on the same machine since they use the same port.
+
 ### Join protocol
 * new peer (X), get random peer (A) from discovery node
 * X send join request to A with X set as destination
