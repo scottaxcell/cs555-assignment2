@@ -82,9 +82,25 @@ public class PeerNode implements Node {
             case Protocol.LOOKUP_REQUEST:
                 handleLookupRequest((LookupRequest) message);
                 break;
+            case Protocol.STORE_FILE:
+                handleStoreFile((StoreFile) message);
+                break;
+            case Protocol.RETRIEVE_FILE_REQUEST:
+                handleRetrieveFileRequest((RetrieveFileRequest) message);
+                break;
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleRetrieveFileRequest(RetrieveFileRequest message) {
+        Utils.debug("received: " + message);
+
+    }
+
+    private void handleStoreFile(StoreFile message) {
+        Utils.debug("received: " + message);
+
     }
 
     private void handleLookupRequest(LookupRequest request) {

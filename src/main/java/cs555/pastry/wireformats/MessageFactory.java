@@ -44,6 +44,12 @@ public class MessageFactory {
                 return new LookupRequest(data);
             case Protocol.LOOKUP_RESPONSE:
                 return new LookupResponse(data);
+            case Protocol.STORE_FILE:
+                return new StoreFile(data);
+            case Protocol.RETRIEVE_FILE_REQUEST:
+                return new RetrieveFileRequest(data, socket);
+            case Protocol.RETRIEVE_FILE_RESPONSE:
+                return new RetrieveFileResponse(data);
             default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }

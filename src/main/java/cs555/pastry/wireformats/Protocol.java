@@ -15,4 +15,7 @@ public class Protocol {
     public static final int LOOKUP_RESPONSE = 311;
     public static final int RANDOM_PEER_REQUEST = 312;
     public static final int RANDOM_PEER_RESPONSE = 313;
+    public static final int STORE_FILE = 314;
+    public static final int RETRIEVE_FILE_REQUEST = 315;
+    public static final int RETRIEVE_FILE_RESPONSE = 316;
 }

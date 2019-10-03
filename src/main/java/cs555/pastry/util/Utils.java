@@ -1,5 +1,8 @@
 package cs555.pastry.util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -127,6 +130,36 @@ public class Utils {
         }
         catch (InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static byte[] readFileToBytes(Path path) {
+        byte[] bytes = new byte[0];
+        try {
+            bytes = Files.readAllBytes(path);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytes;
+    }
+
+    public static void writeBytesToFile(Path path, byte[] bytes) {
+        try {
+            Files.write(path, bytes);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getCanonicalPath(Path path) {
+        try {
+            return path.toFile().getCanonicalPath();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 }

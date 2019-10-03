@@ -2,10 +2,7 @@ package cs555.pastry.node.client;
 
 import cs555.pastry.transport.TcpSender;
 import cs555.pastry.util.Utils;
-import cs555.pastry.wireformats.LookupRequest;
-import cs555.pastry.wireformats.LookupResponse;
-import cs555.pastry.wireformats.RandomPeerRequest;
-import cs555.pastry.wireformats.RandomPeerResponse;
+import cs555.pastry.wireformats.*;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -15,6 +12,7 @@ public class StoreData {
     private final Client client;
     private AtomicBoolean isRunning = new AtomicBoolean();
     private String hexId;
+    private Path path;
 
     public StoreData(Client client) {
         this.client = client;
@@ -22,6 +20,7 @@ public class StoreData {
 
     void storeFile(Path path) {
         setIsRunning(true);
+        this.path = path;
         hexId = Utils.generateHexIdFromFileName(path.getFileName().toString());
         RandomPeerRequest randomPeerRequest = new RandomPeerRequest();
         client.sendDiscoveryNodeMessage(randomPeerRequest);
@@ -40,9 +39,12 @@ public class StoreData {
     }
 
     void handleLookupResponse(LookupResponse response) {
-        // todo
+        byte[] bytes = Utils.readFileToBytes(path);
 
-
+        StoreFile storeFile = new StoreFile(Utils.getCanonicalPath(path), bytes);
+        Utils.debug("sending: " + storeFile);
+        TcpSender tcpSender = TcpSender.of(response.getPeer().getAddress() + ":" + client.getPeerPort());
+        tcpSender.send(storeFile.getBytes());
 
         setIsRunning(false);
     }
