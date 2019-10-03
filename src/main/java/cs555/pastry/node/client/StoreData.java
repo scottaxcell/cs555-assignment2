@@ -5,6 +5,7 @@ import cs555.pastry.util.Utils;
 import cs555.pastry.wireformats.*;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -53,5 +54,11 @@ public class StoreData {
         LookupRequest lookupRequest = new LookupRequest(client.getIp(), hexId, Collections.emptyList());
         TcpSender tcpSender = TcpSender.of(response.getPeer().getAddress() + ":" + client.getPeerPort());
         tcpSender.send(lookupRequest.getBytes());
+    }
+
+    public void handleRetrieveFileResponse(RetrieveFileResponse response) {
+        Path path = Paths.get(String.format("./%s", Paths.get(response.getFileName()).getFileName().toString()));
+        Utils.writeBytesToFile(path, response.getData());
+        Utils.info("File written to " + path.toAbsolutePath());
     }
 }

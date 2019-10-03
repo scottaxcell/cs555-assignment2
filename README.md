@@ -4,7 +4,7 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
-* store file request message
+* ~~store file request message~~
 * retrieve file request message
 * retrieve file response message
 * flesh out routing table row updates on join request

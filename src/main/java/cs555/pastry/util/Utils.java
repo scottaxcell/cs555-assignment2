@@ -146,6 +146,7 @@ public class Utils {
 
     public static void writeBytesToFile(Path path, byte[] bytes) {
         try {
+            Files.createDirectories(path.getParent());
             Files.write(path, bytes);
         }
         catch (IOException e) {

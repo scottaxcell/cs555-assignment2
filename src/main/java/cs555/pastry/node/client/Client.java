@@ -4,10 +4,7 @@ import cs555.pastry.node.Node;
 import cs555.pastry.transport.TcpConnection;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;
-import cs555.pastry.wireformats.LookupResponse;
-import cs555.pastry.wireformats.Message;
-import cs555.pastry.wireformats.Protocol;
-import cs555.pastry.wireformats.RandomPeerResponse;
+import cs555.pastry.wireformats.*;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -71,7 +68,7 @@ public class Client implements Node {
             else if (input.startsWith("sf")) {
 //                Utils.out("file:\n");
 //                String fileName = scanner.next();
-                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/README.md";
+                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/README.md";
                 Path path = Paths.get(fileName);
                 if (!path.toFile().exists()) {
                     Utils.error("file does not exist: " + path);
@@ -84,7 +81,7 @@ public class Client implements Node {
             else if (input.startsWith("rf")) {
 //                Utils.out("file:\n");
 //                String fileName = scanner.next();
-                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/README.md";
+                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/README.md";
                 Path path = Paths.get(fileName);
                 retrieveFile(path);
                 printProgressBar();
@@ -138,9 +135,17 @@ public class Client implements Node {
             case Protocol.LOOKUP_RESPONSE:
                 handleLookupResponse((LookupResponse) message);
                 break;
-            default:
+            case Protocol.RETRIEVE_FILE_RESPONSE:
+                handleRetrieveFileResponse((RetrieveFileResponse) message);
+                break;
+                default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
+    }
+
+    private void handleRetrieveFileResponse(RetrieveFileResponse response) {
+        Utils.debug("received: " + response);
+        storeData.handleRetrieveFileResponse(response);
     }
 
     private void handleLookupResponse(LookupResponse response) {

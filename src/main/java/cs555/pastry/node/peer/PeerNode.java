@@ -5,6 +5,7 @@ import cs555.pastry.routing.DistributedHashTable;
 import cs555.pastry.routing.LeafSet;
 import cs555.pastry.routing.Peer;
 import cs555.pastry.transport.TcpConnection;
+import cs555.pastry.transport.TcpSender;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;
 import cs555.pastry.wireformats.*;
@@ -13,6 +14,8 @@ import cs555.pastry.wireformats.debug.LeafSetResponse;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,9 +24,12 @@ import java.util.regex.Pattern;
 
 public class PeerNode implements Node {
     private static final int FORGET_ME_TTL = 25;
+    private static final String TMP_DIR = "/tmp";
+    private static final String USER_NAME = System.getProperty("user.name");
     private final int port;
     private final TcpServer tcpServer;
     private final TcpConnections tcpConnections;
+    private final Path storageDir;
     private TcpConnection discoveryNodeTcpConnection;
     private DistributedHashTable distributedHashTable;
 
@@ -31,6 +37,7 @@ public class PeerNode implements Node {
         this.port = port;
         tcpServer = new TcpServer(port, this);
         tcpConnections = new TcpConnections(this);
+        storageDir = Paths.get(TMP_DIR, USER_NAME, "pastry");
 
         registerWithDiscoveryNode(discoveryNodeIp, discoveryNodePort);
     }
@@ -95,12 +102,27 @@ public class PeerNode implements Node {
 
     private void handleRetrieveFileRequest(RetrieveFileRequest message) {
         Utils.debug("received: " + message);
+        Path writePath = generateWritePath(message.getFileName());
+        if (!writePath.toFile().exists())
+            return;
 
+        Utils.debug("reading: " + writePath);
+        byte[] data = Utils.readFileToBytes(writePath);
+        RetrieveFileResponse response = new RetrieveFileResponse(message.getFileName(), data);
+        Utils.debug("sending: " + response);
+        TcpSender tcpSender = new TcpSender(message.getSocket());
+        tcpSender.send(response.getBytes());
     }
 
     private void handleStoreFile(StoreFile message) {
         Utils.debug("received: " + message);
+        Path writePath = generateWritePath(message.getFileName());
+        Utils.debug("writing: " + writePath);
+        Utils.writeBytesToFile(writePath, message.getData());
+    }
 
+    private Path generateWritePath(String fileName) {
+        return Paths.get(storageDir.toString(), fileName);
     }
 
     private void handleLookupRequest(LookupRequest request) {
