@@ -41,7 +41,7 @@ public class StoreData {
 
     void handleLookupResponse(LookupResponse response) {
         // todo
-    
+
 
 
         setIsRunning(false);
