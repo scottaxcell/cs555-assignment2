@@ -30,6 +30,7 @@ public class PeerNode implements Node {
     private final TcpServer tcpServer;
     private final TcpConnections tcpConnections;
     private final Path storageDir;
+    private final List<Path> paths = Collections.synchronizedList(new ArrayList<>());
     private TcpConnection discoveryNodeTcpConnection;
     private DistributedHashTable distributedHashTable;
 
@@ -117,6 +118,10 @@ public class PeerNode implements Node {
     private void handleStoreFile(StoreFile message) {
         Utils.debug("received: " + message);
         Path writePath = generateWritePath(message.getFileName());
+        synchronized (paths) {
+            if (!paths.contains(writePath))
+                paths.add(writePath);
+        }
         Utils.debug("writing: " + writePath);
         Utils.writeBytesToFile(writePath, message.getData());
     }
@@ -496,7 +501,16 @@ public class PeerNode implements Node {
     }
 
     private void printStoredFiles() {
-        // todo
+        Utils.info("Stored Files");
+        Utils.out("      ============\n");
+        synchronized (paths) {
+            if (paths.isEmpty())
+                Utils.out("      No files stored at this time\n");
+            else {
+                for (int i = 0; i < paths.size(); i++)
+                    Utils.out("      " + (i+1) + ". " + paths.get(i).toAbsolutePath() + "\n");
+            }
+        }
     }
 
     private void printRoutingTable() {
