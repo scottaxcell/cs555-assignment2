@@ -68,7 +68,7 @@ public class Client implements Node {
             else if (input.startsWith("sf")) {
 //                Utils.out("file:\n");
 //                String fileName = scanner.next();
-                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/README.md";
+                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/Scott-Axcell-HW3-WC.pdf";
                 Path path = Paths.get(fileName);
                 if (!path.toFile().exists()) {
                     Utils.error("file does not exist: " + path);
@@ -81,7 +81,7 @@ public class Client implements Node {
             else if (input.startsWith("rf")) {
 //                Utils.out("file:\n");
 //                String fileName = scanner.next();
-                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/README.md";
+                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/Scott-Axcell-HW3-WC.pdf";
                 Path path = Paths.get(fileName);
                 retrieveFile(path);
                 printProgressBar();
@@ -138,7 +138,7 @@ public class Client implements Node {
             case Protocol.RETRIEVE_FILE_RESPONSE:
                 handleRetrieveFileResponse((RetrieveFileResponse) message);
                 break;
-                default:
+            default:
                 throw new RuntimeException(String.format("received an unknown message with protocol %d", protocol));
         }
     }

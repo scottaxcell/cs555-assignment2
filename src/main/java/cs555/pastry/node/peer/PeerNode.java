@@ -100,17 +100,17 @@ public class PeerNode implements Node {
         }
     }
 
-    private void handleRetrieveFileRequest(RetrieveFileRequest message) {
-        Utils.debug("received: " + message);
-        Path writePath = generateWritePath(message.getFileName());
+    private void handleRetrieveFileRequest(RetrieveFileRequest request) {
+        Utils.debug("received: " + request);
+        Path writePath = generateWritePath(request.getFileName());
         if (!writePath.toFile().exists())
             return;
 
         Utils.debug("reading: " + writePath);
         byte[] data = Utils.readFileToBytes(writePath);
-        RetrieveFileResponse response = new RetrieveFileResponse(message.getFileName(), data);
-        Utils.debug("sending: " + response);
-        TcpSender tcpSender = new TcpSender(message.getSocket());
+        RetrieveFileResponse response = new RetrieveFileResponse(request.getFileName(), data);
+        Utils.debug("sending: " + response + " to " + request.getSocket().getRemoteSocketAddress());
+        TcpSender tcpSender = TcpSender.of(Utils.getIpFromAddress(request.getSocket().getRemoteSocketAddress().toString()) + ":" + getPort());
         tcpSender.send(response.getBytes());
     }
 

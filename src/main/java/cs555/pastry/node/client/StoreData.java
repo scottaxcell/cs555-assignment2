@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class StoreData {
     private final Client client;
     private AtomicBoolean isRunning = new AtomicBoolean();
+    private AtomicBoolean isReading = new AtomicBoolean();
     private String hexId;
     private Path path;
 
@@ -21,14 +22,23 @@ public class StoreData {
 
     void storeFile(Path path) {
         setIsRunning(true);
+
         this.path = path;
         hexId = Utils.generateHexIdFromFileName(path.getFileName().toString());
         RandomPeerRequest randomPeerRequest = new RandomPeerRequest();
+        Utils.debug("sending: " + randomPeerRequest);
         client.sendDiscoveryNodeMessage(randomPeerRequest);
     }
 
     void retrieveFile(Path path) {
-        // todo
+        setIsRunning(true);
+        setIsReading(true);
+
+        this.path = path;
+        hexId = Utils.generateHexIdFromFileName(path.getFileName().toString());
+        RandomPeerRequest randomPeerRequest = new RandomPeerRequest();
+        Utils.debug("sending: " + randomPeerRequest);
+        client.sendDiscoveryNodeMessage(randomPeerRequest);
     }
 
     boolean isRunning() {
@@ -39,15 +49,31 @@ public class StoreData {
         this.isRunning.set(isRunning);
     }
 
+    private boolean isReading() {
+        return isReading.get();
+    }
+
+    private void setIsReading(boolean isReading) {
+        this.isReading.set(isReading);
+    }
+
     void handleLookupResponse(LookupResponse response) {
-        byte[] bytes = Utils.readFileToBytes(path);
+        if (isReading()) {
+            RetrieveFileRequest request = new RetrieveFileRequest(Utils.getCanonicalPath(path));
+            Utils.debug("sending: " + request);
+            TcpSender tcpSender = TcpSender.of(response.getPeer().getAddress() + ":" + client.getPeerPort());
+            tcpSender.send(request.getBytes());
+        }
+        else {
+            byte[] bytes = Utils.readFileToBytes(path);
 
-        StoreFile storeFile = new StoreFile(Utils.getCanonicalPath(path), bytes);
-        Utils.debug("sending: " + storeFile);
-        TcpSender tcpSender = TcpSender.of(response.getPeer().getAddress() + ":" + client.getPeerPort());
-        tcpSender.send(storeFile.getBytes());
+            StoreFile storeFile = new StoreFile(Utils.getCanonicalPath(path), bytes);
+            Utils.debug("sending: " + storeFile);
+            TcpSender tcpSender = TcpSender.of(response.getPeer().getAddress() + ":" + client.getPeerPort());
+            tcpSender.send(storeFile.getBytes());
 
-        setIsRunning(false);
+            setIsRunning(false);
+        }
     }
 
     void handleRandomPeerResponse(RandomPeerResponse response) {
@@ -56,9 +82,13 @@ public class StoreData {
         tcpSender.send(lookupRequest.getBytes());
     }
 
-    public void handleRetrieveFileResponse(RetrieveFileResponse response) {
+    void handleRetrieveFileResponse(RetrieveFileResponse response) {
         Path path = Paths.get(String.format("./%s", Paths.get(response.getFileName()).getFileName().toString()));
         Utils.writeBytesToFile(path, response.getData());
+        Utils.sleep(1500);
         Utils.info("File written to " + path.toAbsolutePath());
+
+        setIsRunning(false);
+        setIsReading(false);
     }
 }
