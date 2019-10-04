@@ -31,6 +31,7 @@ public class NetworkPrinter {
         synchronized (pendingPeers) {
             pendingPeers.clear();
             pendingPeers.addAll(peers);
+            peerToLeafSet.clear();
 
             for (Peer peer : pendingPeers) {
                 TcpSender tcpSender = TcpSender.of(String.format("%s:%d", peer.getAddress(), peerPort));

@@ -16,14 +16,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class PeerNode implements Node {
-    private static final int FORGET_ME_TTL = 25;
+    private static final int FORGET_ME_TTL = 10;
     private static final String TMP_DIR = "/tmp";
     private static final String USER_NAME = System.getProperty("user.name");
     private final int port;
@@ -82,7 +79,7 @@ public class PeerNode implements Node {
                 handleRoutingTableUpdate((RoutingTableUpdate) message);
                 break;
             case Protocol.LEAF_SET_REQUEST:
-                handleLeafSetRequset((LeafSetRequest) message);
+                handleLeafSetRequest((LeafSetRequest) message);
                 break;
             case Protocol.FORGET_ME:
                 handleForgetMe((ForgetMe) message);
@@ -104,9 +101,10 @@ public class PeerNode implements Node {
     private void handleRetrieveFileRequest(RetrieveFileRequest request) {
         Utils.debug("received: " + request);
         Path writePath = generateWritePath(request.getFileName());
-        if (!writePath.toFile().exists())
+        if (!writePath.toFile().exists()) {
+            Utils.error(writePath + "does not exist");
             return;
-
+        }
         Utils.debug("reading: " + writePath);
         byte[] data = Utils.readFileToBytes(writePath);
         RetrieveFileResponse response = new RetrieveFileResponse(request.getFileName(), data);
@@ -178,7 +176,7 @@ public class PeerNode implements Node {
         rightTcpConnection.send(message.getBytes());
     }
 
-    private void handleLeafSetRequset(LeafSetRequest request) {
+    private void handleLeafSetRequest(LeafSetRequest request) {
         Utils.debug("received: " + request);
         LeafSetResponse response = new LeafSetResponse(new Peer(getHexId(), getIp()), distributedHashTable.getLeafSet());
         Utils.debug("sending: " + response);
@@ -200,6 +198,29 @@ public class PeerNode implements Node {
             distributedHashTable.setRightNeighbor(update.getPeer());
 
         distributedHashTable.printState();
+
+        synchronized (paths) {
+            String neighborId = update.getPeer().getId();
+            Iterator<Path> pathIterator = paths.iterator();
+            while (pathIterator.hasNext()) {
+                Path path = pathIterator.next();
+                String filePath = path.toString().replaceAll(storageDir.toString(), "");
+                String pathId = Utils.generateHexIdFromFileName(filePath);
+                int myAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(getHexId(), pathId);
+                int neighborAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(neighborId, pathId);
+
+                if (neighborAbsoluteDifference < myAbsoluteDifference || (neighborAbsoluteDifference == myAbsoluteDifference && Utils.getHexIdDecimalDifference(neighborId, getHexId()) > 0)) {
+                    Utils.debug("reading: " + path);
+                    byte[] data = Utils.readFileToBytes(path);
+                    StoreFile storeFile = new StoreFile(filePath, data);
+                    Utils.debug("sending: " + storeFile);
+                    TcpConnection tcpConnection = getTcpConnection(update.getPeer().getAddress());
+                    tcpConnection.send(storeFile.getBytes());
+                    pathIterator.remove();
+                    // todo print diagnostics
+                }
+            }
+        }
     }
 
     private void handleJoinRequest(JoinRequest request) {
@@ -491,7 +512,7 @@ public class PeerNode implements Node {
             else if (input.startsWith("rn")) {
                 removeNodeFromNetwork();
             }
-            else if (input.startsWith("prt")) {
+            else if (input.startsWith("pr")) {
                 printRoutingTable();
             }
             else if (input.startsWith("lf")) {
@@ -508,7 +529,7 @@ public class PeerNode implements Node {
                 Utils.out("      No files stored at this time\n");
             else {
                 for (int i = 0; i < paths.size(); i++)
-                    Utils.out("      " + (i+1) + ". " + paths.get(i).toAbsolutePath() + "\n");
+                    Utils.out("      " + (i + 1) + ". " + paths.get(i).toAbsolutePath() + "\n");
             }
         }
     }
@@ -528,14 +549,39 @@ public class PeerNode implements Node {
         TcpConnection rightTcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getRightNeighborAddress());
         rightTcpConnection.send(new LeafSetUpdate(distributedHashTable.getLeafSet().getLeftNeighbor(), true).getBytes());
         rightTcpConnection.send(forgetMe.getBytes());
+
+        synchronized (paths) {
+            for (Path path : paths) {
+                String filePath = path.toString().replaceAll(storageDir.toString(), "");
+                String pathId = Utils.generateHexIdFromFileName(filePath);
+                int leftNeighborAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(distributedHashTable.getLeafSet().getLeftNeighborId(), pathId);
+                int rightNeighborAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(distributedHashTable.getLeafSet().getRightNeighborId(), pathId);
+
+                TcpConnection tcpConnection;
+                if (leftNeighborAbsoluteDifference < rightNeighborAbsoluteDifference)
+                    tcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getLeftNeighborAddress());
+                else if (rightNeighborAbsoluteDifference < leftNeighborAbsoluteDifference)
+                    tcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getRightNeighborAddress());
+                else if (Utils.getHexIdDecimalDifference(distributedHashTable.getLeafSet().getLeftNeighborId(), distributedHashTable.getLeafSet().getRightNeighborId()) > 0)
+                    tcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getLeftNeighborAddress());
+                else
+                    tcpConnection = getTcpConnection(distributedHashTable.getLeafSet().getRightNeighborAddress());
+
+                Utils.debug("reading: " + path);
+                byte[] data = Utils.readFileToBytes(path);
+                StoreFile storeFile = new StoreFile(filePath, data);
+                Utils.debug("sending: " + storeFile);
+                tcpConnection.send(storeFile.getBytes());
+            }
+        }
     }
 
     private static void printMenu() {
-        Utils.out("\n*************************************\n");
-        Utils.out("h   -- print this menu\n");
-        Utils.out("rn  -- remove node from network\n");
-        Utils.out("prt -- print routing table and leaf set\n");
-        Utils.out("lf  -- print stored files\n");
-        Utils.out("***************************************\n");
+        Utils.out("\n************************************\n");
+        Utils.out("h  -- print this menu\n");
+        Utils.out("rn -- remove node from network\n");
+        Utils.out("pr -- print routing table and leaf set\n");
+        Utils.out("lf -- print stored files\n");
+        Utils.out("**************************************\n");
     }
 }

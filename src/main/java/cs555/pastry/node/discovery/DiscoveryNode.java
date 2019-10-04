@@ -148,10 +148,10 @@ public class DiscoveryNode implements Node {
             else if (input.startsWith("h")) {
                 printMenu();
             }
-            else if (input.startsWith("pnt")) {
+            else if (input.startsWith("pt")) {
                 printNetworkTopology();
             }
-            else if (input.startsWith("lan")) {
+            else if (input.startsWith("ln")) {
                 printActiveNodes();
             }
         }
@@ -176,11 +176,11 @@ public class DiscoveryNode implements Node {
     }
 
     private static void printMenu() {
-        Utils.out("\n*****************************\n");
-        Utils.out("h   -- print this menu\n");
-        Utils.out("pnt -- print network topology\n");
-        Utils.out("lan -- list active nodes\n");
-        Utils.out("*****************************\n");
+        Utils.out("\n****************************\n");
+        Utils.out("h  -- print this menu\n");
+        Utils.out("pt -- print network topology\n");
+        Utils.out("ln -- list active nodes\n");
+        Utils.out("****************************\n");
     }
 
     private static void printHelpAndExit() {
