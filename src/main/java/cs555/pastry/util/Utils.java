@@ -1,18 +1,33 @@
 package cs555.pastry.util;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Random;
 
 public class Utils {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
     public static final int HEXADECIMAL_RADIX = 16;
     public static final int NUM_16_BIT_ID_DIGITS = 4;
     private static boolean debug = true;
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 15; i++) {
+            Timestamp timestamp = Timestamp.from(Instant.now());
+//        String sha1FromBytes1 = createSha1FromBytes(timeStamp.getTime());
+            String timestampS = Timestamp.from(Instant.now()).toString();
+            String sha1 = createSha1FromBytes(timestampS.getBytes());
+            Utils.debug(sha1.substring(sha1.length() - 4));
+            sleep(new Random().nextInt(1000));
+        }
+    }
 
     public static void out(Object o) {
         System.out.print(o);
@@ -162,5 +177,19 @@ public class Utils {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static String createSha1FromBytes(byte[] data) {
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA1");
+        }
+        catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return "";
+        }
+        byte[] hash = digest.digest(data);
+        BigInteger hashInt = new BigInteger(1, hash);
+        return hashInt.toString(16);
     }
 }
