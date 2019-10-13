@@ -66,9 +66,8 @@ public class Client implements Node {
                 System.exit(0);
             }
             else if (input.startsWith("sf")) {
-//                Utils.out("file:\n");
-//                String fileName = scanner.next();
-                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/Scott-Axcell-HW3-WC.pdf";
+                Utils.out("file:\n");
+                String fileName = scanner.next();
                 Path path = Paths.get(fileName);
                 if (!path.toFile().exists()) {
                     Utils.error("file does not exist: " + path);
@@ -79,9 +78,8 @@ public class Client implements Node {
                 Utils.info("Stored " + path);
             }
             else if (input.startsWith("rf")) {
-//                Utils.out("file:\n");
-//                String fileName = scanner.next();
-                String fileName = "/s/chopin/a/grad/sgaxcell/cs555-assignment2/files/Scott-Axcell-HW3-WC.pdf";
+                Utils.out("file:\n");
+                String fileName = scanner.next();
                 Path path = Paths.get(fileName);
                 retrieveFile(path);
                 printProgressBar();
@@ -90,12 +88,12 @@ public class Client implements Node {
     }
 
     private void retrieveFile(Path path) {
-        Utils.info("Retrieving " + path + " ...", false);
+        Utils.info("Retrieving " + path + " ...");
         storeData.retrieveFile(path);
     }
 
     private void storeFile(Path path) {
-        Utils.info("Storing " + path + " ...", false);
+        Utils.info("Storing " + path + " ...");
         storeData.storeFile(path);
     }
 
@@ -103,9 +101,9 @@ public class Client implements Node {
         try {
             while (storeData.isRunning()) {
                 Thread.sleep(500);
-                Utils.out(".");
+//                Utils.out(".");
             }
-            Utils.out("\n");
+//            Utils.out("\n");
         }
         catch (InterruptedException e) {
             e.printStackTrace();

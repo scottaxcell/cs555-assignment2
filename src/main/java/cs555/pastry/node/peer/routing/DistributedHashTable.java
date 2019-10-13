@@ -18,45 +18,33 @@ public class DistributedHashTable {
     }
 
     public String lookup(String destHexId) {
-        // if L0 < D < Ll, return A (this node)
-        if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighborId()) > 0
-            && Utils.getHexIdDecimalDifference(leafSet.getRightNeighborId(), destHexId) > 0) {
-            Utils.debug("lookup for: " + destHexId + " " + hexId + "(self)");
-            return hexId;
-        }
-        else {
-            List<String> peers = new ArrayList<>();
-            peers.add(hexId);
+        List<String> peers = new ArrayList<>();
+        peers.add(hexId);
 
-            if (!leafSet.getLeftNeighborId().isEmpty())
-                peers.add(leafSet.getLeftNeighborId());
+        if (!leafSet.getLeftNeighborId().isEmpty())
+            peers.add(leafSet.getLeftNeighborId());
 
-            if (!leafSet.getRightNeighborId().isEmpty())
-                peers.add(leafSet.getRightNeighborId());
+        if (!leafSet.getRightNeighborId().isEmpty())
+            peers.add(leafSet.getRightNeighborId());
 
-            String nextPeerId = routingTable.lookup(destHexId);
-            if (!nextPeerId.isEmpty())
-                peers.add(nextPeerId);
+        String nextPeerId = routingTable.lookup(destHexId);
+        if (!nextPeerId.isEmpty())
+            peers.add(nextPeerId);
 
-            // sort peers by closest hex id value
-            peers.sort((hexId1, hexId2) -> {
-                int absoluteHexDiff1 = Utils.getAbsoluteHexIdDecimalDifference(destHexId, hexId1);
-                int absoluteHexDiff2 = Utils.getAbsoluteHexIdDecimalDifference(destHexId, hexId2);
-                if (absoluteHexDiff2 < absoluteHexDiff1)
-                    return 1;
-                else if (absoluteHexDiff1 < absoluteHexDiff2)
-                    return -1;
-                else
-                    return Utils.getHexIdDecimalDifference(hexId1, hexId2) > 0 ? -1 : 1;
-            });
-            Utils.debug("lookup for: " + destHexId + " " + peers);
+        // sort peers by closest hex id value
+        peers.sort((hexId1, hexId2) -> {
+            int absoluteHexDiff1 = Utils.getAbsoluteHexIdDecimalDifference(destHexId, hexId1);
+            int absoluteHexDiff2 = Utils.getAbsoluteHexIdDecimalDifference(destHexId, hexId2);
+            if (absoluteHexDiff2 < absoluteHexDiff1)
+                return 1;
+            else if (absoluteHexDiff1 < absoluteHexDiff2)
+                return -1;
+            else
+                return Utils.getHexIdDecimalDifference(hexId1, hexId2) > 0 ? -1 : 1;
+        });
+        Utils.info("lookup for: " + destHexId + " " + peers);
 
-            return peers.get(0);
-        }
-    }
-
-    public void updateRoutingTable(Peer peer) {
-        routingTable.update(peer);
+        return peers.get(0);
     }
 
     public void setLeftNeighbor(Peer peer) {
@@ -68,8 +56,8 @@ public class DistributedHashTable {
     }
 
     public void printState() {
-        Utils.out("Hex ID: " + hexId + "\n");
-        Utils.out("============\n");
+        Utils.info("Hex ID: " + hexId);
+        Utils.out("      ============\n");
         leafSet.printState();
         routingTable.printState();
     }
@@ -105,6 +93,8 @@ public class DistributedHashTable {
         for (String hop : route) {
             String hopId = PeerNode.getHopId(hop);
             if (hexId.equals(hopId))
+                continue;
+            if (leafSet.getLeftNeighborId().equals(hop) || leafSet.getRightNeighborId().equals(hop))
                 continue;
             String hopIp = PeerNode.getHopIp(hop);
             routingTable.update(new Peer(hopId, hopIp));

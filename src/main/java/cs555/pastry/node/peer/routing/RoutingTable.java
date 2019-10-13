@@ -68,14 +68,15 @@ public class RoutingTable {
     }
 
     public void printState() {
-        StringBuilder stringBuilder = new StringBuilder("Routing Table\n");
-        stringBuilder.append("   ");
+        StringBuilder stringBuilder = new StringBuilder("      Routing Table\n");
+        stringBuilder.append("      -------------\n");
+        stringBuilder.append("         ");
         for (int col = 0; col < Utils.HEXADECIMAL_RADIX; col++)
             stringBuilder.append(String.format("%-5s", Integer.toHexString(col)));
         stringBuilder.append("\n");
 
         for (int row = 0; row < table.length; row++) {
-            stringBuilder.append(String.format("%-3s", row));
+            stringBuilder.append(String.format("      %-3s", row));
             for (int col = 0; col < table[row].length; col++) {
                 Peer peer = table[row][col];
                 if (peer != null)

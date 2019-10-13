@@ -16,7 +16,7 @@ public class Utils {
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
     public static final int HEXADECIMAL_RADIX = 16;
     public static final int NUM_16_BIT_ID_DIGITS = 4;
-    private static boolean debug = true;
+    private static boolean debug = false;
 
     public static void main(String[] args) {
         for (int i = 0; i < 15; i++) {

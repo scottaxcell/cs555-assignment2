@@ -37,7 +37,7 @@ public class Peers {
             return false;
 
         synchronized (peers) {
-            Utils.info("registered peer " + peer.getId() + " @ " + peer.getAddress());
+            Utils.info("Registered peer " + peer.getId() + " @ " + peer.getAddress());
             return peers.add(peer);
         }
     }

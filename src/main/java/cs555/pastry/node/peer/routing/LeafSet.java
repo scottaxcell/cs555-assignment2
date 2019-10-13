@@ -55,9 +55,10 @@ public class LeafSet {
     }
 
     public void printState() {
-        StringBuilder stringBuilder = new StringBuilder("Leaf Set\n");
-        stringBuilder.append("   left  peer: ").append(leftNeighbor).append("\n");
-        stringBuilder.append("   right peer: ").append(rightNeghbor).append("\n");
+        StringBuilder stringBuilder = new StringBuilder("      Leaf Set\n");
+        stringBuilder.append("      --------\n");
+        stringBuilder.append("         Left  peer: ").append(getLeftNeighborId()).append(" @ ").append(getLeftNeighborAddress()).append("\n");
+        stringBuilder.append("         Right peer: ").append(getRightNeighborId()).append(" @ ").append(getRightNeighborAddress()).append("\n");
         stringBuilder.append("\n");
         Utils.out(stringBuilder);
     }
