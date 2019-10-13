@@ -30,13 +30,14 @@ public class PeerNode implements Node {
     private final List<Path> paths = Collections.synchronizedList(new ArrayList<>());
     private TcpConnection discoveryNodeTcpConnection;
     private DistributedHashTable distributedHashTable;
+    private final String customHexId;
 
-    public PeerNode(int port, String discoveryNodeIp, int discoveryNodePort) {
+    public PeerNode(int port, String discoveryNodeIp, int discoveryNodePort, String customHexId) {
         this.port = port;
+        this.customHexId = customHexId;
         tcpServer = new TcpServer(port, this);
         tcpConnections = new TcpConnections(this);
         storageDir = Paths.get(TMP_DIR, USER_NAME, "pastry");
-
         registerWithDiscoveryNode(discoveryNodeIp, discoveryNodePort);
     }
 
@@ -44,7 +45,7 @@ public class PeerNode implements Node {
         try {
             Socket socket = new Socket(discoveryNodeIp, discoveryNodePort);
             discoveryNodeTcpConnection = new TcpConnection(socket, this);
-            RegisterRequest request = new RegisterRequest(Utils.generateHexIdFromTimestamp(), Utils.getIpFromAddress(socket.getLocalSocketAddress().toString()));
+            RegisterRequest request = new RegisterRequest(customHexId.isEmpty() ? Utils.generateHexIdFromTimestamp() : customHexId, Utils.getIpFromAddress(socket.getLocalSocketAddress().toString()));
             discoveryNodeTcpConnection.send(request.getBytes());
         }
         catch (IOException e) {
@@ -468,14 +469,18 @@ public class PeerNode implements Node {
     }
 
     public static void main(String[] args) {
-        if (args.length != 3)
+        if (args.length != 3 && args.length != 4)
             printHelpAndExit();
 
         int port = Integer.parseInt(args[0]);
         String discoveryNodeIp = args[1];
         int discoveryNodePort = Integer.parseInt(args[2]);
 
-        new PeerNode(port, discoveryNodeIp, discoveryNodePort).run();
+        String customHexId = "";
+        if (args.length == 4)
+            customHexId = args[3];
+
+        new PeerNode(port, discoveryNodeIp, discoveryNodePort, customHexId).run();
     }
 
     private static void printHelpAndExit() {

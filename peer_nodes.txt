@@ -1,6 +1,7 @@
 oklahoma-city
 helena
 montpelier
+denver
 raleigh
 sacramento
 harrisburg

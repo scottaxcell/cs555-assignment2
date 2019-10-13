@@ -27,12 +27,12 @@ Implementing The Pastry Peer To Peer Network
 * ~~list-nodes: prints list of active peers~~
 
 ### Peer node
-* accept hex id from command line
+* ~~accept hex id from command line~~
 * print the following on joining: DHT, route
 * print DHT on update
 * print when storing a file or sends to another peer
 * print on lookupRequest/join queries: type of message, dest/file id, hop count, next hop
-* remove-node: remove self from network after contacting discovery node
+* ~~remove-node: remove self from network after contacting discovery node~~
 * print-dht: print DHT
 * list-files: prints files in storage
 * give the poor fella a nickname!
