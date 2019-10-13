@@ -1,7 +1,7 @@
 package cs555.pastry;
 
-import cs555.pastry.routing.Peer;
-import cs555.pastry.routing.RoutingTable;
+import cs555.pastry.node.peer.routing.Peer;
+import cs555.pastry.node.peer.routing.RoutingTable;
 import cs555.pastry.util.Utils;
 import org.junit.After;
 import org.junit.Assert;

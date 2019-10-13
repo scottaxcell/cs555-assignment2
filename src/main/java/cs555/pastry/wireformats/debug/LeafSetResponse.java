@@ -1,7 +1,7 @@
 package cs555.pastry.wireformats.debug;
 
-import cs555.pastry.routing.LeafSet;
-import cs555.pastry.routing.Peer;
+import cs555.pastry.node.peer.routing.LeafSet;
+import cs555.pastry.node.peer.routing.Peer;
 import cs555.pastry.wireformats.Message;
 import cs555.pastry.wireformats.Protocol;
 import cs555.pastry.wireformats.WireformatUtils;

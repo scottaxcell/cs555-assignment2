@@ -1,6 +1,6 @@
 package cs555.pastry.node.discovery;
 
-import cs555.pastry.routing.Peer;
+import cs555.pastry.node.peer.routing.Peer;
 import cs555.pastry.util.Utils;
 
 import java.util.ArrayList;

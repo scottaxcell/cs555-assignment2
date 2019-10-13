@@ -1,7 +1,7 @@
 package cs555.pastry.node.discovery;
 
 import cs555.pastry.node.Node;
-import cs555.pastry.routing.Peer;
+import cs555.pastry.node.peer.routing.Peer;
 import cs555.pastry.transport.TcpSender;
 import cs555.pastry.transport.TcpServer;
 import cs555.pastry.util.Utils;

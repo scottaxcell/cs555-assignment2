@@ -1,6 +1,6 @@
 package cs555.pastry.wireformats;
 
-import cs555.pastry.routing.Peer;
+import cs555.pastry.node.peer.routing.Peer;
 
 import java.io.*;
 import java.net.Socket;

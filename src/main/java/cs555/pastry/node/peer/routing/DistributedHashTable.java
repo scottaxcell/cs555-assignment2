@@ -1,4 +1,4 @@
-package cs555.pastry.routing;
+package cs555.pastry.node.peer.routing;
 
 import cs555.pastry.node.peer.PeerNode;
 import cs555.pastry.util.Utils;

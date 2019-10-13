@@ -1,9 +1,9 @@
 package cs555.pastry.node.peer;
 
 import cs555.pastry.node.Node;
-import cs555.pastry.routing.DistributedHashTable;
-import cs555.pastry.routing.LeafSet;
-import cs555.pastry.routing.Peer;
+import cs555.pastry.node.peer.routing.DistributedHashTable;
+import cs555.pastry.node.peer.routing.LeafSet;
+import cs555.pastry.node.peer.routing.Peer;
 import cs555.pastry.transport.TcpConnection;
 import cs555.pastry.transport.TcpSender;
 import cs555.pastry.transport.TcpServer;

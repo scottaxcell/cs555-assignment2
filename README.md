@@ -4,9 +4,10 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
+* use sha1 of timestamp to generate peer id
 * ~~store file request message~~
-* retrieve file request message
-* retrieve file response message
+* ~~retrieve file request message~~
+* ~~retrieve file response message~~
 * flesh out routing table row updates on join request
 * don't add a peer to the routing table if it is already in the leafset
 * file read/write on client and peer nodes
