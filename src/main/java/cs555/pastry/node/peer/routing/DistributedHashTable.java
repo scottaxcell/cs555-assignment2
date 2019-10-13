@@ -21,6 +21,7 @@ public class DistributedHashTable {
         // if L0 < D < Ll, return A (this node)
         if (Utils.getHexIdDecimalDifference(destHexId, leafSet.getLeftNeighborId()) > 0
             && Utils.getHexIdDecimalDifference(leafSet.getRightNeighborId(), destHexId) > 0) {
+            Utils.debug("lookup for: " + destHexId + " " + hexId + "(self)");
             return hexId;
         }
         else {
@@ -48,6 +49,7 @@ public class DistributedHashTable {
                 else
                     return Utils.getHexIdDecimalDifference(hexId1, hexId2) > 0 ? -1 : 1;
             });
+            Utils.debug("lookup for: " + destHexId + " " + peers);
 
             return peers.get(0);
         }

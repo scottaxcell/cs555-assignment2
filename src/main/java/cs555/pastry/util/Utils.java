@@ -54,13 +54,14 @@ public class Utils {
     }
 
     public static String generateHexIdFromTimestamp() {
-        String hexId = convertBytesToHex(Timestamp.from(Instant.now()).toString().getBytes());
-        return hexId.substring(hexId.length() - NUM_16_BIT_ID_DIGITS);
+        String timestamp = Timestamp.from(Instant.now()).toString();
+        String sha1 = createSha1FromBytes(timestamp.getBytes());
+        return sha1.substring(sha1.length() - NUM_16_BIT_ID_DIGITS);
     }
 
     public static String generateHexIdFromFileName(String fileName) {
-        String hexId = convertBytesToHex(fileName.getBytes());
-        return hexId.substring(hexId.length() - NUM_16_BIT_ID_DIGITS);
+        String sha1 = createSha1FromBytes(fileName.getBytes());
+        return sha1.substring(sha1.length() - NUM_16_BIT_ID_DIGITS);
     }
 
     public static String getLongestCommonPrefix(String hexId1, String hexId2) {

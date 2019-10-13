@@ -102,7 +102,7 @@ public class PeerNode implements Node {
         Utils.debug("received: " + request);
         Path writePath = generateWritePath(request.getFileName());
         if (!writePath.toFile().exists()) {
-            Utils.error(writePath + "does not exist");
+            Utils.error(writePath + " does not exist");
             return;
         }
         Utils.debug("reading: " + writePath);

@@ -4,14 +4,14 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
-* use sha1 of timestamp to generate peer id
+* handle file migration when new nodes join the network
+* ~~use sha1 of timestamp to generate peer id~~
 * ~~store file request message~~
 * ~~retrieve file request message~~
 * ~~retrieve file response message~~
 * flesh out routing table row updates on join request
 * don't add a peer to the routing table if it is already in the leafset
-* file read/write on client and peer nodes
-* refactor messages to use Peers where applicable
+* ~~file read/write on client and peer nodes~~
 * ~~add the peer that is traversed in the join request flow to the routing table~~
 * ~~discovery node debug message to get all leafsets and print current network state~~
 * ~~buffer register requests, send registration complete when node joins network~~
@@ -23,8 +23,8 @@ Implementing The Pastry Peer To Peer Network
 * send alive heartbeats to connected peers, on disconnect update peer db
 * ~~return a random node from the peer db~~
 * ~~ensure a peer's id s unique on registration~~
-* handle peer removal and print peer was removed
-* list-nodes: prints list of active peers
+* NOT NEEDED ANYMORE - ~~handle peer removal and print peer was removed~~
+* ~~list-nodes: prints list of active peers~~
 
 ### Peer node
 * accept hex id from command line
