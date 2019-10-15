@@ -9,7 +9,7 @@ for peer_node in $(cat peer_nodes.txt)
 do
   echo 'logging into '$peer_node
   COMMAND="xterm -geometry 200x48 -e 'ssh -t $peer_node \"$START_PEER_NODE\"'"
-  #echo $COMMAND
+  echo $COMMAND
   eval $COMMAND &
 done
 

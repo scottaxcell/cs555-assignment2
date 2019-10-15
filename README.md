@@ -4,7 +4,7 @@ Implementing The Pastry Peer To Peer Network
 ## TODO
 
 ### Miscellaneous
-* handle file migration when new nodes join the network
+* ~~handle file migration when new nodes join the network~~
 * ~~use sha1 of timestamp to generate peer id~~
 * ~~store file request message~~
 * ~~retrieve file request message~~
@@ -20,10 +20,10 @@ Implementing The Pastry Peer To Peer Network
 * ~~take another look at storing tcp connections in order to prevent creation of tons of tcp receiver threads~~
 
 ### Discovery node
-* send alive heartbeats to connected peers, on disconnect update peer db
+* NOT REQUIRED ~~send alive heartbeats to connected peers, on disconnect update peer db~~
 * ~~return a random node from the peer db~~
 * ~~ensure a peer's id s unique on registration~~
-* NOT NEEDED ANYMORE - ~~handle peer removal and print peer was removed~~
+* NOT REQUIRED ANYMORE - ~~handle peer removal and print peer was removed~~
 * ~~list-nodes: prints list of active peers~~
 
 ### Peer node

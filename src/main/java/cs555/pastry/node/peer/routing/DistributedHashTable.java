@@ -42,7 +42,7 @@ public class DistributedHashTable {
             else
                 return Utils.getHexIdDecimalDifference(hexId1, hexId2) > 0 ? -1 : 1;
         });
-        Utils.info("lookup for: " + destHexId + " " + peers);
+//        Utils.info("lookup for: " + destHexId + " " + peers);
 
         return peers.get(0);
     }

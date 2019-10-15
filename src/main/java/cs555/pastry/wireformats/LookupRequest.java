@@ -8,7 +8,7 @@ public class LookupRequest implements Message {
     private int protocol;
     private String sourceAddress;
     private String destinationHexId;
-    private List<String> route = new ArrayList<>(); // todo use List<Peer> instead
+    private List<String> route = new ArrayList<>();
 
     public LookupRequest() {
     }

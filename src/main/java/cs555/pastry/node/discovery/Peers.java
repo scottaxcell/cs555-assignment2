@@ -20,7 +20,7 @@ public class Peers {
 
     public Peer getRandomPeer(String excludingId) {
         synchronized (peers) {
-            if (peers.isEmpty() || peers.size() == 1)
+            if (peers.isEmpty() || (peers.size() == 1 && peers.get(0).getId().equals(excludingId)))
                 return null;
 
             Peer peer = peers.get(ThreadLocalRandom.current().nextInt(peers.size()));
@@ -53,6 +53,7 @@ public class Peers {
     public void removePeer(Peer peer) {
         synchronized (peers) {
             peers.remove(peer);
+            Utils.info("Removed registered peer " + peer.getId() + " @ " + peer.getAddress());
         }
     }
 }

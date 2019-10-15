@@ -60,7 +60,7 @@ public class StoreData {
     }
 
     void handleLookupResponse(LookupResponse response) {
-        StringBuilder sb = new StringBuilder("Lookup response route: ");
+        StringBuilder sb = new StringBuilder("Lookup response route (" + (response.getRoute().size() + 1) + "): ");
         for (String hop :response.getRoute())
             sb.append(PeerNode.getHopId(hop)).append(" ");
         Utils.info(sb.toString());

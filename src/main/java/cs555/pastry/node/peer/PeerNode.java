@@ -149,7 +149,15 @@ public class PeerNode implements Node {
             if (tcpConnection != null) {
                 Utils.debug("sending: " + lookupRequest);
                 tcpConnection.send(lookupRequest.getBytes());
-                // todo print join request
+                Utils.out("\n");
+                Utils.info("Routing lookup request");
+                Utils.out("     ----------------------\n");
+                Utils.out("      Destination: " + destinationHexId + "\n");
+                StringBuilder sb = new StringBuilder("      Route (" + (request.getRoute().size() + 1) + "): ");
+                for (String hop : request.getRoute())
+                    sb.append(PeerNode.getHopId(hop)).append(" ");
+                Utils.out(sb.toString() + "\n");
+                Utils.out("      Next hop: " + peer.getId() + "\n");
             }
         }
         else {
@@ -158,7 +166,17 @@ public class PeerNode implements Node {
             if (tcpConnection != null) {
                 Utils.debug("sending: " + lookupResponse);
                 tcpConnection.send(lookupResponse.getBytes());
-                // todo print join response
+                Utils.out("\n");
+                Utils.info("Sending lookup response");
+                Utils.out("      ------------------------\n");
+                Utils.out("      Destination: " + destinationHexId + "\n");
+                if (!request.getRoute().isEmpty()) {
+                    StringBuilder sb = new StringBuilder("      Route (" + (request.getRoute().size() + 1) + "): ");
+                    for (String hop : request.getRoute())
+                        sb.append(PeerNode.getHopId(hop)).append(" ");
+                    Utils.out(sb.toString() + "\n");
+                    Utils.out("      Next hop: " + getHopId(request.getInitHop()) + "\n");
+                }
             }
         }
     }
@@ -187,6 +205,7 @@ public class PeerNode implements Node {
 
     private void handleRoutingTableUpdate(RoutingTableUpdate update) {
         Utils.debug("received: " + update);
+        Utils.out("\n");
         Utils.info("Received routing table update message");
         distributedHashTable.updateRoutingTable(update.getPeers());
         distributedHashTable.printState();
@@ -194,6 +213,7 @@ public class PeerNode implements Node {
 
     private void handleLeafSetUpdate(LeafSetUpdate update) {
         Utils.debug("received: " + update);
+        Utils.out("\n");
         Utils.info("Received leaf set update message");
 
         if (update.isLeftNeighbor())
@@ -208,26 +228,26 @@ public class PeerNode implements Node {
             Iterator<Path> pathIterator = paths.iterator();
             while (pathIterator.hasNext()) {
                 Path path = pathIterator.next();
-                String filePath = path.toString().replaceAll(storageDir.toString(), "");
+                String filePath = path.getFileName().toString().replaceAll(storageDir.toString(), "");
+                Utils.debug(filePath);
                 String pathId = Utils.generateHexIdFromFileName(filePath);
                 int myAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(getHexId(), pathId);
                 int neighborAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(neighborId, pathId);
 
                 Utils.debug("pathId: " + pathId);
                 Utils.debug("myAbsoluteDifference: " + myAbsoluteDifference);
-                Utils.debug("neighbotAbsoluteDifference: " + neighborAbsoluteDifference);
+                Utils.debug("neighborAbsoluteDifference: " + neighborAbsoluteDifference);
 
                 if (neighborAbsoluteDifference < myAbsoluteDifference || (neighborAbsoluteDifference == myAbsoluteDifference && Utils.getHexIdDecimalDifference(neighborId, getHexId()) > 0)) {
                     Utils.debug("reading: " + path);
                     byte[] data = Utils.readFileToBytes(path);
                     StoreFile storeFile = new StoreFile(filePath, data);
                     Utils.debug("sending: " + storeFile);
-                    Utils.info("Migrating " + filePath + " (" + pathId + ") to " + update.getPeer());
+                    Utils.info("Migrating " + filePath + " (" + pathId + ") to " + update.getPeer().getId());
 
                     TcpConnection tcpConnection = getTcpConnection(update.getPeer().getAddress());
                     tcpConnection.send(storeFile.getBytes());
                     pathIterator.remove();
-                    // todo print diagnostics
                 }
             }
         }
@@ -283,8 +303,16 @@ public class PeerNode implements Node {
             TcpConnection tcpConnection = getTcpConnection(peer.getAddress());
             if (tcpConnection != null) {
                 Utils.debug("sending: " + joinRequest);
+                Utils.out("\n");
+                Utils.info("Routing join request");
+                Utils.out("      --------------------\n");
+                Utils.out("      New peer: " + getHopId(request.getInitHop()) + "\n");
+                StringBuilder sb = new StringBuilder("      Route (" + (request.getRoute().size() + 1) + "): ");
+                for (String hop : request.getRoute())
+                    sb.append(PeerNode.getHopId(hop)).append(" ");
+                Utils.out(sb.toString() + "\n");
+                Utils.out("      Next hop: " + peer.getId() + "\n");
                 tcpConnection.send(joinRequest.getBytes());
-                // todo print join request
             }
         }
         else
@@ -297,7 +325,15 @@ public class PeerNode implements Node {
         if (tcpConnection != null) {
             Utils.debug("sending: " + joinResponse);
             tcpConnection.send(joinResponse.getBytes());
-            // todo print join response
+            Utils.out("\n");
+            Utils.info("Routing join response");
+            Utils.out("      ---------------------\n");
+            Utils.out("      New peer: " + getHopId(request.getInitHop()) + "\n");
+            StringBuilder sb = new StringBuilder("      Route (" + (request.getRoute().size() + 1) + "): ");
+            for (String hop : request.getRoute())
+                sb.append(PeerNode.getHopId(hop)).append(" ");
+            Utils.out(sb.toString() + "\n");
+            Utils.out("      Next hop: " + getHopId(request.getInitHop()) + "\n");
         }
     }
 
@@ -413,10 +449,11 @@ public class PeerNode implements Node {
                 tcpConnection.send(routingTableUpdate.getBytes());
             }
         }
+        Utils.out("\n");
         Utils.info("Received join response message");
 
-        StringBuilder sb = new StringBuilder("Join response route: ");
-        for (String hop :response.getRoute())
+        StringBuilder sb = new StringBuilder("Join response route (" + (response.getRoute().size() + 1) + "): ");
+        for (String hop : response.getRoute())
             sb.append(PeerNode.getHopId(hop)).append(" ");
         Utils.info(sb.toString());
 
@@ -451,12 +488,17 @@ public class PeerNode implements Node {
             Utils.info("Registered with discovery node as " + response.getAssignedId());
             if (!response.getRandomPeerId().isEmpty())
                 Utils.info("Joining DHT via random peer " + response.getRandomPeerId() + " @ " + response.getRandomPeerAddress());
-
+            else
+                Utils.info("First node to join the network, no join request sent");
             distributedHashTable = new DistributedHashTable(response.getAssignedId());
             String randomPeerId = response.getRandomPeerId();
             if (!randomPeerId.isEmpty()) {
                 JoinRequest joinRequest = new JoinRequest(getIp(), getHexId(), Collections.singletonList(createMyHopString()), Collections.emptyList());
                 Utils.debug("sending: " + joinRequest);
+                Utils.info("Sending join request");
+                Utils.out("      --------------------\n");
+                Utils.out("      New node: " + response.getAssignedId() + "\n");
+                Utils.out("      Next hop: " + response.getRandomPeerId() + "\n");
                 TcpConnection tcpConnection = getTcpConnection(response.getRandomPeerAddress());
                 tcpConnection.send(joinRequest.getBytes());
             }
@@ -571,7 +613,7 @@ public class PeerNode implements Node {
 
         synchronized (paths) {
             for (Path path : paths) {
-                String filePath = path.toString().replaceAll(storageDir.toString(), "");
+                String filePath = path.getFileName().toString().replaceAll(storageDir.toString(), "");
                 String pathId = Utils.generateHexIdFromFileName(filePath);
                 int leftNeighborAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(distributedHashTable.getLeafSet().getLeftNeighborId(), pathId);
                 int rightNeighborAbsoluteDifference = Utils.getAbsoluteHexIdDecimalDifference(distributedHashTable.getLeafSet().getRightNeighborId(), pathId);
